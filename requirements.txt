@@ -1,5 +1,13 @@
 numpy>=1.26
 opencv-python>=4.8
 
+# deep learning / experimentos (modelos e dataset publico)
+torch>=2.0
+torchvision>=0.15
+scikit-learn>=1.3
+# FaceNet + MTCNN; instalado com --no-deps: o metadata pina numpy<2 e o
+# ambiente usa numpy 2.x (Python 3.14, sem wheels de numpy<2)
+facenet-pytorch>=2.6
+
 # dev / testes
 pytest>=8.0

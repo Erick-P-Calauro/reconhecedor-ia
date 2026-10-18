@@ -1,0 +1,40 @@
+{
+  "experiment": {
+    "name": "yunet-resnet50",
+    "timestamp": "2026-10-18T17:10:22"
+  },
+  "config": {
+    "dataset": "data/lfw",
+    "model": "resnet50",
+    "face_detector": "yunet",
+    "preprocessor": "imagenet-224x224",
+    "recognition": "cosine-threshold-0.60",
+    "threshold": 0.6,
+    "crop_padding": 0.25
+  },
+  "counts": {
+    "gallery_samples": 126,
+    "gallery_enrolled": 7,
+    "probe_samples": 249,
+    "probe_evaluated": 249,
+    "discarded_no_face": 0,
+    "discarded_gallery": 0,
+    "discarded_probe": 0,
+    "tp": 21,
+    "fp": 200,
+    "tn": 0,
+    "fn": 28
+  },
+  "metrics": {
+    "accuracy": 0.084337,
+    "precision": 0.095023,
+    "recall": 0.428571,
+    "far": 1.0,
+    "frr": 0.571429,
+    "tp": 21,
+    "fp": 200,
+    "tn": 0,
+    "fn": 28,
+    "total": 249
+  }
+}

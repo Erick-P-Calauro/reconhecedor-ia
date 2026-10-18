@@ -17,7 +17,7 @@ O pipeline é implementado por meio de uma arquitetura em camadas, cada uma com 
 |------------------|-----------------------|-------------------------------------------------------|
 | Dataloader       | `dataloader/`         | Carregar imagens de datasets públicos ou por arquivos (`.png/.jpg/.jpeg`)     |
 | FaceDetector     | `face_detector/`      | Detectar faces, descartar imagens sem face, recortar  |
-| PreProcessor     | `preprocessor/`       | Padronizar a entrada da Model (cinza, 128×128, [0,1]) |
+| PreProcessor     | `preprocessor/`       | Padronizar a entrada da Model|
 | Model            | `model/`              | Gerar o embedding facial (interface `Model`;) |
 | FaceRecognition  | `face_recognition/`   | Comparar embeddings; reconhecer ou declarar `None`    |
 | Evaluator        | `evaluator/`          | Métricas por experimento, salvas em arquivo           |

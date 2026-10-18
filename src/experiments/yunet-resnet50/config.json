@@ -1,0 +1,11 @@
+{
+  "name": "yunet-resnet50",
+  "dataset": "data/lfw",
+  "face_detection_model": "yunet",
+  "face_recognition_model": "resnet50",
+  "parameters": {
+    "threshold": 0.6,
+    "crop_padding": 0.25,
+    "image_size": 224
+  }
+}

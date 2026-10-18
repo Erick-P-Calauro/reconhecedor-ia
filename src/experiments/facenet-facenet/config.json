@@ -1,0 +1,11 @@
+{
+  "name": "facenet-facenet",
+  "dataset": "data/lfw",
+  "face_detection_model": "facenet",
+  "face_recognition_model": "facenet",
+  "parameters": {
+    "threshold": 0.5,
+    "crop_padding": 0.25,
+    "image_size": 160
+  }
+}

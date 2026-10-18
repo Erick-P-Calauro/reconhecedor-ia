@@ -1,0 +1,8 @@
+timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn,discarded_no_face
+2026-10-18T16:19:29,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T16:21:22,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T16:23:47,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T16:27:57,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T16:32:44,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T16:41:02,facenet-facenet,data/lfw,facenet,0.983871,0.960784,1.0,0.026667,0.0,49,2,73,0,0
+2026-10-18T17:03:46,facenet-facenet,data/lfw,facenet,0.975904,0.890909,1.0,0.03,0.0,49,6,194,0,0

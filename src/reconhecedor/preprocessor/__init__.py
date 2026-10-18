@@ -2,5 +2,6 @@
 
 from .base import PreProcessor
 from .standard import StandardPreProcessor
+from .torch_preprocessor import TorchPreProcessor
 
-__all__ = ["PreProcessor", "StandardPreProcessor"]
+__all__ = ["PreProcessor", "StandardPreProcessor", "TorchPreProcessor"]

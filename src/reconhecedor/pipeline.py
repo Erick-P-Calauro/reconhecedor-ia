@@ -1,4 +1,9 @@
-"""Orquestracao do fluxo da Spec 001 sobre as camadas da ADR 001."""
+"""Orquestracao generica do fluxo da Spec 001 sobre as camadas da ADR 001.
+
+Esta pasta contem apenas a **implementacao base** das camadas e a
+orquestracao delas. A definicao de experimentos (configuracao, instanciação
+das camadas e resultados) fica em ``src/experiments/<nome>/`` (ADR 002).
+"""
 
 from __future__ import annotations
 
@@ -18,32 +23,8 @@ from .types import PredictionRecord, Sample
 
 
 @dataclass
-class ExperimentConfig:
-    """Definicao de um experimento (ADR 002): uma replicacao do pipeline.
-
-    O dataset e organizado em ``<dataset_root>/gallery`` (pessoas previamente
-    cadastradas - Spec 003 RF-03) e ``<dataset_root>/probe`` (imagens a
-    reconhecer; identidades fora da galeria sao desconhecidas - RF-04).
-    """
-
-    name: str = "baseline"
-    dataset_root: str | Path = Path("data/demo")
-    output_dir: str | Path = Path("results")
-    threshold: float = 0.8
-    crop_padding: float = 0.25
-
-    @property
-    def gallery_root(self) -> Path:
-        return Path(self.dataset_root) / "gallery"
-
-    @property
-    def probe_root(self) -> Path:
-        return Path(self.dataset_root) / "probe"
-
-
-@dataclass
 class ExperimentResult:
-    """Resultado de uma execucao de experimento."""
+    """Resultado de uma execucao de pipeline/experimento."""
 
     metrics: Metrics
     run_dir: Path
@@ -75,8 +56,8 @@ def _face_embedding(
 
 
 def run_experiment(
-    config: ExperimentConfig,
     *,
+    name: str,
     gallery_loader: Dataloader,
     probe_loader: Dataloader,
     detector: FaceDetector,
@@ -84,13 +65,25 @@ def run_experiment(
     model: Model,
     recognition: FaceRecognition | None = None,
     evaluator: Evaluator | None = None,
+    dataset: str | Path = "",
+    output_dir: str | Path,
+    threshold: float,
+    crop_padding: float,
 ) -> ExperimentResult:
     """Executa o pipeline completo (Spec 001) e persiste as metricas.
 
     As camadas chegam por injecao de dependencia: trocar a Model (ou qualquer
     outra camada) nao exige alteracoes neste pipeline (Spec 003 RNF-01).
+    A configuracao do experimento (modelos, dataset, parametros) vem de
+    ``src/experiments/<nome>/config.json`` (ADR 002); aqui apenas orquestramos
+    a execucao e gravamos as metricas em ``output_dir`` (Spec 004 RNF-01).
+
+    ``output_dir``, ``threshold`` e ``crop_padding`` sao **obrigatorios**: a
+    base nao assume valores calibrados de experimento (ADR 002 — cada
+    experimento passa os seus, tipicamente lidos do proprio ``config.json``;
+    o resultado deve cair dentro de ``src/experiments/<nome>/results/``).
     """
-    recognition = recognition if recognition is not None else FaceRecognition(threshold=config.threshold)
+    recognition = recognition if recognition is not None else FaceRecognition(threshold=threshold)
     evaluator = evaluator if evaluator is not None else Evaluator()
 
     # 1) Galeria: cadastra as pessoas do dominio (RF-03).
@@ -99,7 +92,7 @@ def run_experiment(
     enrolled_ids: set[str] = set()
     for sample in gallery_samples:
         embedding = _face_embedding(
-            sample, detector=detector, preprocessor=preprocessor, model=model, padding=config.crop_padding
+            sample, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
         )
         if embedding is None:
             discarded_gallery.append(sample.path)
@@ -113,7 +106,7 @@ def run_experiment(
     records: list[PredictionRecord] = []
     for sample in probe_samples:
         embedding = _face_embedding(
-            sample, detector=detector, preprocessor=preprocessor, model=model, padding=config.crop_padding
+            sample, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
         )
         if embedding is None:
             discarded_probe.append(sample.path)  # RF-02
@@ -131,13 +124,13 @@ def run_experiment(
     # 3) Avaliacao (Spec 004) + persistencia em arquivo (RNF-01).
     metrics = evaluator.evaluate(records, enrolled_ids)
     config_info = {
-        "dataset": str(config.dataset_root),
+        "dataset": str(dataset),
         "model": model.name,
         "face_detector": detector.name,
         "preprocessor": preprocessor.name,
         "recognition": recognition.name,
-        "threshold": config.threshold,
-        "crop_padding": config.crop_padding,
+        "threshold": threshold,
+        "crop_padding": crop_padding,
     }
     counts = {
         "gallery_samples": len(gallery_samples),
@@ -151,8 +144,8 @@ def run_experiment(
     }
     run_dir = evaluator.save(
         metrics,
-        name=config.name,
-        output_dir=config.output_dir,
+        name=name,
+        output_dir=output_dir,
         config=config_info,
         counts=counts,
     )

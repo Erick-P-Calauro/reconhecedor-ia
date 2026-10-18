@@ -1,0 +1,40 @@
+{
+  "experiment": {
+    "name": "baseline",
+    "timestamp": "2026-10-18T12:25:34"
+  },
+  "config": {
+    "dataset": "data/demo",
+    "model": "baseline-hog",
+    "face_detector": "yunet",
+    "preprocessor": "standard-gray-128x128",
+    "recognition": "cosine-threshold-0.80",
+    "threshold": 0.8,
+    "crop_padding": 0.25
+  },
+  "counts": {
+    "gallery_samples": 1,
+    "gallery_enrolled": 1,
+    "probe_samples": 6,
+    "probe_evaluated": 4,
+    "discarded_no_face": 2,
+    "discarded_gallery": 0,
+    "discarded_probe": 2,
+    "tp": 3,
+    "fp": 0,
+    "tn": 1,
+    "fn": 0
+  },
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "far": 0.0,
+    "frr": 0.0,
+    "tp": 3,
+    "fp": 0,
+    "tn": 1,
+    "fn": 0,
+    "total": 4
+  }
+}

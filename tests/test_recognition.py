@@ -6,8 +6,11 @@ import numpy as np
 import pytest
 
 from reconhecedor.face_recognition import FaceRecognition
-from reconhecedor.model import BaselineHogModel, Model
+from reconhecedor.model import Model
 from reconhecedor.preprocessor import StandardPreProcessor
+
+# A implementacao baseline da Model e do experimento, nao da base (ADR 002).
+from experiments.baseline.hog_model import BaselineHogModel
 
 
 def _face_like(size: int = 128, shift: int = 0, seed: int = 0) -> np.ndarray:
@@ -79,3 +82,9 @@ def test_empty_gallery_identifies_everyone_as_unknown():
 def test_threshold_validation():
     with pytest.raises(ValueError):
         FaceRecognition(threshold=1.5)
+
+
+def test_threshold_has_no_default_in_base_layer():
+    """ADR 002: a base nao embute limiar calibrado de experimento (ex.: 0.8)."""
+    with pytest.raises(TypeError):
+        FaceRecognition()

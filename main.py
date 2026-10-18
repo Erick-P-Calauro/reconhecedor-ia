@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 """Entrypoint do reconhecedor-ia.
 
+Experimentos ficam em ``src/experiments/<nome>/`` com sua configuracao,
+seu wiring e seus resultados (ADR 002).
+
 Uso:
-    python main.py build-demo              # monta o dataset demo em data/demo
+    python main.py build-demo              # monta o dataset demo (do experimento
+                                           # baseline, em src/experiments/baseline/demo.py)
+    python main.py experiments             # lista os experimentos disponiveis
     python main.py run                     # roda o experimento baseline
-    python main.py run --dataset data/demo --name meu-experimento
+    python main.py run --experiment baseline --dataset data/demo
     python main.py metrics                 # consulta o historico de metricas
+    python main.py metrics --experiment baseline
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import importlib
 import sys
 from pathlib import Path
 
@@ -27,46 +34,113 @@ for _stream in (sys.stdout, sys.stderr):
 
 
 def cmd_build_demo(args: argparse.Namespace) -> int:
-    from reconhecedor.demo import build_demo_dataset
+    """Monta o dataset demo via ferramenta do experimento baseline (ADR 002).
 
-    build_demo_dataset(args.dest)
+    A preparacao do dataset e implementacao do experimento, nao da base:
+    ``build-demo`` apenas delega a ``experiments.baseline.demo``.
+    """
+    try:
+        module = importlib.import_module("experiments.baseline.demo")
+    except ModuleNotFoundError as exc:
+        missing = exc.name or ""
+        if missing == "experiments" or missing.startswith("experiments."):
+            print("Ferramenta de dataset do experimento 'baseline' nao encontrada")
+            print(f"  esperado: src/experiments/baseline/demo.py (ausente: {missing})")
+            print("Crie a subpasta dedicada do experimento em src/experiments/ (ADR 002)")
+            print("ou verifique 'python main.py experiments'.")
+            return 1
+        raise
+
+    module.build_demo_dataset(args.dest)
+    return 0
+
+
+def _load_experiment(requested: str | None):
+    """Importa ``experiments.<nome>.experiment`` (descoberta ADR 002).
+
+    Retorna ``(modulo, nomes_descobertos)``; o modulo e ``None`` quando o
+    experimento pedido nao existe (mensagem ja impressa).
+    """
+    from experiments import discover_experiments
+
+    names = discover_experiments()
+    if not names:
+        print("Nenhum experimento encontrado em src/experiments/ (ADR 002).")
+        print("Crie uma subpasta dedicada com config.json e experiment.py.")
+        return None, names
+
+    name = requested
+    if name is None:
+        if "baseline" in names:
+            name = "baseline"
+        elif len(names) == 1:
+            name = names[0]
+        else:
+            print("Mais de um experimento disponivel; use --experiment <nome>.")
+            print(f"Disponiveis: {', '.join(names)}")
+            return None, names
+
+    if name not in names:
+        print(f"Experimento '{name}' nao encontrado em src/experiments/.")
+        print(f"Disponiveis: {', '.join(names)}")
+        return None, names
+
+    module = importlib.import_module(f"experiments.{name}.experiment")
+    return module, names
+
+
+def cmd_experiments(args: argparse.Namespace) -> int:
+    from experiments import discover_experiments, experiment_dir
+    from experiments.config import load_config
+
+    names = discover_experiments()
+    if not names:
+        print("Nenhum experimento encontrado em src/experiments/ (ADR 002).")
+        return 1
+
+    for name in names:
+        config = load_config(experiment_dir(name))
+        params = config.parameters
+        print(config.name)
+        print(f"  deteccao: {config.face_detection_model} | reconhecimento: {config.face_recognition_model}")
+        print(
+            "  dataset: {} | limiar: {} | recorte: {} | imagem: {}x{}".format(
+                config.dataset,
+                params.get("threshold"),
+                params.get("crop_padding"),
+                params.get("image_size"),
+                params.get("image_size"),
+            )
+        )
+        print(f"  resultados: {config.results_dir}")
+        print()
     return 0
 
 
 def cmd_run(args: argparse.Namespace) -> int:
-    from reconhecedor.dataloader import FolderDataloader
-    from reconhecedor.evaluator import Evaluator
-    from reconhecedor.face_detector import YuNetFaceDetector
-    from reconhecedor.face_recognition import FaceRecognition
-    from reconhecedor.model import BaselineHogModel
-    from reconhecedor.pipeline import ExperimentConfig, run_experiment
-    from reconhecedor.preprocessor import StandardPreProcessor
+    module, _ = _load_experiment(args.experiment)
+    if module is None:
+        return 1
 
-    config = ExperimentConfig(
-        name=args.name,
-        dataset_root=args.dataset,
-        output_dir=args.output,
-        threshold=args.threshold,
-        crop_padding=args.padding,
-    )
-    detector_kwargs = {}
-    if args.detector_model:
-        detector_kwargs["model_path"] = args.detector_model
+    overrides = {
+        key: value
+        for key, value in {
+            "dataset": args.dataset,
+            "threshold": args.threshold,
+            "crop_padding": args.padding,
+            "image_size": args.image_size,
+            "detector_model_path": args.detector_model,
+        }.items()
+        if value is not None
+    }
 
-    result = run_experiment(
-        config,
-        gallery_loader=FolderDataloader(config.gallery_root),
-        probe_loader=FolderDataloader(config.probe_root),
-        detector=YuNetFaceDetector(**detector_kwargs),
-        preprocessor=StandardPreProcessor(size=(args.image_size, args.image_size)),
-        model=BaselineHogModel(),
-        recognition=FaceRecognition(threshold=config.threshold),
-        evaluator=Evaluator(),
-    )
+    config = module.load()
+    result = module.run(**overrides)
 
     metrics = result.metrics
     print()
-    print(f"Experimento '{config.name}' concluido ({config.dataset_root})")
+    print(f"Experimento '{config.name}' concluido")
+    print(f"  config: {module.CONFIG_PATH}")
     print(f"  galeria: {result.n_gallery} imagens | probe: {result.n_probe} imagens")
     print(f"  descartadas sem face: {result.discarded_gallery + result.discarded_probe}")
     print(
@@ -84,32 +158,49 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 
 def cmd_metrics(args: argparse.Namespace) -> int:
+    from experiments import discover_experiments, experiment_dir
     from reconhecedor.evaluator.evaluator import HISTORY_FILENAME
 
-    history_path = Path(args.output) / HISTORY_FILENAME
-    if not history_path.is_file():
-        print(f"Nenhuma metrica registrada ainda (arquivo inexistente: {history_path})")
-        print("Rode 'python main.py run' primeiro.")
-        return 1
-
-    with history_path.open(newline="", encoding="utf-8") as handle:
-        rows = list(csv.DictReader(handle))
-    if not rows:
-        print(f"Historico vazio: {history_path}")
-        return 1
+    names = discover_experiments()
+    if args.experiment:
+        if args.experiment not in names:
+            available = ", ".join(names) if names else "(nenhum)"
+            print(f"Experimento '{args.experiment}' nao encontrado. Disponiveis: {available}")
+            return 1
+        names = [args.experiment]
 
     headers = ["timestamp", "experiment", "model", "accuracy", "precision", "recall", "far", "frr"]
-    widths = {header: max(len(header), *(len(row.get(header, "")) for row in rows)) for header in headers}
-    print("  ".join(header.ljust(widths[header]) for header in headers))
-    for row in rows:
-        print("  ".join(row.get(header, "").ljust(widths[header]) for header in headers))
-    print(f"\nHistorico completo: {history_path}")
+    printed_any = False
+    for name in names:
+        # ADR 002 (caracteristica 4): o historico vive na subpasta do experimento.
+        history_path = experiment_dir(name) / "results" / HISTORY_FILENAME
+        if not history_path.is_file():
+            continue
+
+        with history_path.open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+        if not rows:
+            print(f"Historico vazio: {history_path}")
+            continue
+
+        printed_any = True
+        print(f"Experimento '{name}' — {history_path}")
+        widths = {header: max(len(header), *(len(row.get(header, "")) for row in rows)) for header in headers}
+        print("  ".join(header.ljust(widths[header]) for header in headers))
+        for row in rows:
+            print("  ".join(row.get(header, "").ljust(widths[header]) for header in headers))
+        print()
+
+    if not printed_any:
+        print(f"Nenhuma metrica registrada ainda (arquivo inexistente: src/experiments/*/results/{HISTORY_FILENAME})")
+        print("Rode 'python main.py run' primeiro.")
+        return 1
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Pipeline de reconhecimento facial replicavel (spec 001-004)."
+        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-002)."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -119,18 +210,24 @@ def build_parser() -> argparse.ArgumentParser:
     build_demo.add_argument("--dest", default="data/demo", help="pasta de destino (padrao: data/demo)")
     build_demo.set_defaults(func=cmd_build_demo)
 
-    run = subparsers.add_parser("run", help="executa um experimento ponta a ponta")
-    run.add_argument("--dataset", default="data/demo", help="raiz do dataset (com gallery/ e probe/)")
-    run.add_argument("--name", default="baseline", help="nome do experimento (ADR 002)")
-    run.add_argument("--output", default="results", help="pasta de saida das metricas")
-    run.add_argument("--threshold", type=float, default=0.8, help="limiar de similaridade [0,1]")
-    run.add_argument("--padding", type=float, default=0.25, help="margem do recorte da face")
-    run.add_argument("--image-size", type=int, default=128, help="lado do quadrado pre-processado")
+    experiments = subparsers.add_parser(
+        "experiments", help="lista os experimentos de src/experiments/ (ADR 002)"
+    )
+    experiments.set_defaults(func=cmd_experiments)
+
+    run = subparsers.add_parser("run", help="executa um experimento de src/experiments/ ponta a ponta")
+    run.add_argument("--experiment", "-e", default=None, help="experimento a executar (padrao: baseline)")
+    run.add_argument("--dataset", default=None, help="sobrescreve o dataset da configuracao")
+    run.add_argument("--threshold", type=float, default=None, help="sobrescreve o limiar de similaridade [0,1]")
+    run.add_argument("--padding", type=float, default=None, help="sobrescreve a margem do recorte da face")
+    run.add_argument("--image-size", type=int, default=None, help="sobrescreve o lado do quadrado pre-processado")
     run.add_argument("--detector-model", default=None, help="caminho alternativo do modelo do detector")
     run.set_defaults(func=cmd_run)
 
-    metrics = subparsers.add_parser("metrics", help="lista o historico de metricas salvas")
-    metrics.add_argument("--output", default="results", help="pasta de saida das metricas")
+    metrics = subparsers.add_parser(
+        "metrics", help="lista o historico de metricas de src/experiments/<nome>/results/"
+    )
+    metrics.add_argument("--experiment", "-e", default=None, help="restringe a um experimento")
     metrics.set_defaults(func=cmd_metrics)
 
     return parser

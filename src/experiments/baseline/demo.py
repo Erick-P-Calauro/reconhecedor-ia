@@ -1,8 +1,14 @@
-"""Montagem do dataset demo (imagens publicas) para o experimento baseline.
+"""Montagem do dataset demo (imagens publicas) em ``data/demo``.
 
-As imagens sao de fontes publicas (scikit-image e amostras do proprio
-OpenCV) e sao baixadas para ``data/demo``; nada aqui e dado privado de
-participantes. A pasta ``data/`` nao e versionada (Spec 003 RNF-02).
+Ferramenta de preparacao de dataset do **experimento baseline** (ADR 002):
+e a implementacao por tras do subcomando ``build-demo`` do ``main.py`` e o
+dataset que ela monta e exatamente o declarado em
+``src/experiments/baseline/config.json``. Como faz parte da preparacao do
+experimento, vive na subpasta dedicada dele e nao em ``src/reconhecedor/``
+(pasta base das camadas — ADR 002, ultima caracteristica). As imagens sao de
+fontes publicas (scikit-image e amostras do proprio OpenCV) e sao baixadas
+para ``data/demo``; nada aqui e dado privado de participantes. A pasta
+``data/`` nao e versionada (Spec 003 RNF-02).
 """
 
 from __future__ import annotations
@@ -13,7 +19,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from .dataloader.folder_dataloader import DEFAULT_EXTENSIONS
+from reconhecedor.dataloader.folder_dataloader import DEFAULT_EXTENSIONS
 
 URLS = {
     "astronaut.png": (

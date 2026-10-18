@@ -14,9 +14,13 @@ class FaceRecognition:
       (``enroll`` + maior similaridade de cosseno >= limiar).
     - RF-04: pessoas fora do dominio sao classificadas como desconhecidas
       (similaridade abaixo do limiar => ``predicted_label = None``).
+
+    ``threshold`` e **obrigatorio**: a pasta base nao calibra limiar de
+    experimento (ADR 002) — o valor vem da configuracao do experimento
+    (``src/experiments/<nome>/config.json``).
     """
 
-    def __init__(self, threshold: float = 0.8) -> None:
+    def __init__(self, threshold: float) -> None:
         if not 0.0 <= threshold <= 1.0:
             raise ValueError("threshold deve estar em [0, 1]")
         self.threshold = float(threshold)

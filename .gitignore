@@ -1,15 +1,10 @@
-private/*
-logs/*
-models/*
+data/**
+private/**
+logs/**
+models/**
+tests/**
 .env
 contexto.md
-
-# datasets e dados privados de participantes (Spec 003 RNF-02/RNF-03)
-data/*
-!data/README.md
-
-# artefatos de resultados (metricas continuam consultaveis localmente)
-results/
 
 # python
 __pycache__/

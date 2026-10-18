@@ -1,14 +1,18 @@
-"""Model baseline: HOG classico com numpy (sem dependencia de deep learning).
+"""Model do experimento baseline: HOG classico com numpy (sem DL).
 
-Mantem a interface ``Model`` pronta para plugar redes neurais depois
-(Spec 003 RNF-01): basta implementar ``Model.embed`` em uma nova classe.
+Implementacao da camada ``Model`` (ADR 001) usada **por este experimento**
+(``face_recognition_model: "baseline-hog"`` no ``config.json``); portanto fica
+na subpasta dedicada do experimento e nao em ``src/reconhecedor/model/``
+(pasta base — ADR 002, ultima caracteristica). Mantem a interface ``Model``
+pronta para plugar redes neurais depois (Spec 003 RNF-01): basta implementar
+``Model.embed`` em uma nova classe, na base ou em outro experimento.
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-from .base import Model
+from reconhecedor.model import Model
 
 
 class BaselineHogModel(Model):

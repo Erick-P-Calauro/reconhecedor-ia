@@ -13,5 +13,4 @@ Características de experimento :
  - Cada experimento é implementado na pasta src/experiments em uma subpasta dedicada.
  - Cada experimento contém em sua subpasta suas configurações, para que sua utilização seja replicada por qualquer usuário.
  - Cada experimento contém em sua subpasta seus resultados, para que sua replicação seja verificada por qualquer usuário.
-
-Nenhuma implementação de experimento deve estar na mesma pasta da implementação base das camadas do sistema
+ - Nenhuma implementação de experimento deve estar na mesma pasta da implementação base das camadas do sistema

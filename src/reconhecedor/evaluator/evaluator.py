@@ -1,0 +1,98 @@
+"""Persistencia das metricas por experimento (Spec 004 RNF-01)."""
+
+from __future__ import annotations
+
+import csv
+import json
+from datetime import datetime
+from pathlib import Path
+
+from ..types import PredictionRecord
+from .metrics import Metrics, compute_metrics
+
+HISTORY_FILENAME = "metrics_history.csv"
+HISTORY_FIELDS = [
+    "timestamp",
+    "experiment",
+    "dataset",
+    "model",
+    "accuracy",
+    "precision",
+    "recall",
+    "far",
+    "frr",
+    "tp",
+    "fp",
+    "tn",
+    "fn",
+    "discarded_no_face",
+]
+
+
+class Evaluator:
+    """Camada responsavel por gerar metricas e avaliar um experimento."""
+
+    def evaluate(
+        self,
+        records: list[PredictionRecord],
+        enrolled_labels: list[str] | set[str],
+    ) -> Metrics:
+        """RF-01: gera as metricas (RF-02..RF-06) de um experimento."""
+        return compute_metrics(records, enrolled_labels)
+
+    def save(
+        self,
+        metrics: Metrics,
+        *,
+        name: str,
+        output_dir: str | Path,
+        config: dict | None = None,
+        counts: dict | None = None,
+    ) -> Path:
+        """RNF-01: grava as metricas em arquivo para consulta posterior.
+
+        - ``<output_dir>/<nome>/<timestamp>/metrics.json``: relatorio completo
+          da execucao.
+        - ``<output_dir>/metrics_history.csv``: historico agregado de todos os
+          experimentos (append).
+
+        Apenas metricas e agregados sao persistidos (Spec 003 RNF-02/RNF-03:
+        nenhum dado biometrico privado).
+        """
+        output_dir = Path(output_dir)
+        timestamp = datetime.now()
+        run_dir = output_dir / name / timestamp.strftime("%Y%m%d-%H%M%S")
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        payload = {
+            "experiment": {"name": name, "timestamp": timestamp.isoformat(timespec="seconds")},
+            "config": config or {},
+            "counts": counts or {},
+            "metrics": metrics.to_dict(),
+        }
+        (run_dir / "metrics.json").write_text(
+            json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        self._append_history(output_dir / HISTORY_FILENAME, payload)
+        return run_dir
+
+    @staticmethod
+    def _append_history(history_path: Path, payload: dict) -> None:
+        counts = payload.get("counts", {})
+        config = payload.get("config", {})
+        row = {
+            "timestamp": payload["experiment"]["timestamp"],
+            "experiment": payload["experiment"]["name"],
+            "dataset": config.get("dataset", ""),
+            "model": config.get("model", ""),
+            **{key: payload["metrics"][key] for key in ("accuracy", "precision", "recall", "far", "frr", "tp", "fp", "tn", "fn")},
+            "discarded_no_face": counts.get("discarded_no_face", 0),
+        }
+        history_path.parent.mkdir(parents=True, exist_ok=True)
+        write_header = not history_path.is_file()
+        with history_path.open("a", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=HISTORY_FIELDS)
+            if write_header:
+                writer.writeheader()
+            writer.writerow(row)

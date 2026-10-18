@@ -1,4 +1,4 @@
-# ADR 001 - Software Architecture
+# ADR 002 - Experiment Definition
 
 ## Contexto
 
@@ -6,10 +6,4 @@ Esta decisão foi tomada durante a concepção do projeto. O objetivo dessa deci
 
 ## Decisão
 
-O fluxo de reconhecimento facial do projeto deve ser implementado seguindo uma arquitetura em camadas. As camadas do projeto são : 
- - Dataloader : Camada responsável pelo carregamento das imagens dos datasets
- - FaceDetector : Camada responsável pela funcionalidade de detecção de faces
- - PreProcessor : Camada responsável por processar as imagens para que estejam em formatos adequados para a camada Model.
- - Model : Camada de rede neural e responsável pela geração dos embeddings faciais
- - FaceRecognition : Camada responsável por comparar os embeddings faciais e realizar o reconhecimento facial.
- - Evaluator : Camada responsável por gerar métricas e fazer avaliação do desempenho de um experimento.
+Um experimento é uma configuração do sistema que contém modelo, dataset e parâmetros de configuração. Cada experimento deve ser uma instância do sistema, implementando cada camada especificada na decisão "001-software-architecture".

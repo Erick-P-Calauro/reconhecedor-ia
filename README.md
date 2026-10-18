@@ -1,12 +1,17 @@
 # Reconhecedor Facial
 
-Pipeline de reconhecimento facial replicável, onde cada replicação com modelo/dataset
-diferente é um experimento.
+Este repositório armazena a implementação de pipeline de reconhecimento facial replicável, onde cada replicação com modelo/dataset diferente é um experimento. Este sistema faz parte de um trabalho sobre reconhecimento facial por meio de técnicas de inteligência artificial.
 
-## Arquitetura 
+Você pode consultar a pasta docs para entender quais funcionalidades o sistema pretende implementar e sobre quais restrições.
 
-O pipeline é implementado como arquitetura em camadas, cada uma com interface
-própria (ABC) em `src/reconhecedor/`:
+## Sumário 
+ - [Arquitetura do sistema](#requisites)
+ - [Como instalar as dependências](#instalacao)
+ - [Como utilizar o sistema](#utilizacao)
+
+<h2 id="arquitetura">Arquitetura do Sistema</h2>
+
+O pipeline é implementado por meio de uma arquitetura em camadas, cada uma com interface própria em `src/reconhecedor/`:
 
 | Camada           | Pacote                | Responsabilidade                                      |
 |------------------|-----------------------|-------------------------------------------------------|
@@ -17,12 +22,10 @@ própria (ABC) em `src/reconhecedor/`:
 | FaceRecognition  | `face_recognition/`   | Comparar embeddings; reconhecer ou declarar `None`    |
 | Evaluator        | `evaluator/`          | Métricas por experimento, salvas em arquivo           |
 
-`src/reconhecedor/pipeline.py` orquestra o fluxo genérico; as camadas chegam por
-**injeção de dependência**, então trocar a Model (ex.: FaceNet/ArcFace)
-não exige alterações no pipeline — basta implementar `Model.embed`
-(Spec 003, RNF-01).
+O arquivo `src/reconhecedor/pipeline.py` orquestra o fluxo genérico; as camadas chegam por
+**injeção de dependência**, então trocar a Model (ex.: FaceNet/ArcFace) não exige alterações no pipeline — basta implementar `Model.embed`.
 
-## Instalação
+<h2 id="instalacao">Instalação</h2>
 
 Requer Python 3.10+ (testado em 3.14, Windows).
 
@@ -30,7 +33,9 @@ Requer Python 3.10+ (testado em 3.14, Windows).
 pip install -r requirements.txt
 ```
 
-## Uso
+<h2 id="utilizacao">Como utilizar</h2>
+
+### Comandos
 
 ```powershell
 
@@ -44,9 +49,13 @@ python main.py run
 python main.py metrics
 ```
 
-Opções úteis de `run` (sobrescrevem o `config.json` do experimento):
+### Parâmetros
 
 ```powershell
+
+# Define experimento, dataset, treshold e tamanho padrão das imagens via argumentos
 python main.py run --experiment baseline --dataset data/meu-dataset `
                    --threshold 0.8 --image-size 128
+
+# Consulta o histórico de métricas do experimento baseline
 python main.py metrics --experiment baseline

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Entrypoint do reconhecedor-ia.
 
 Experimentos ficam em ``src/experiments/<nome>/`` com sua configuracao,

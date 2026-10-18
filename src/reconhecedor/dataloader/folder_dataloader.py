@@ -1,12 +1,9 @@
 """Dataloader de pasta (layout tipico de datasets publicos, ex.: LFW)."""
 
 from __future__ import annotations
-
 from pathlib import Path
-
 import cv2
 import numpy as np
-
 from ..types import Sample
 from .base import Dataloader
 
@@ -15,12 +12,7 @@ DEFAULT_EXTENSIONS = (".png", ".jpg", ".jpeg")
 
 
 def read_image(path: str | Path) -> np.ndarray | None:
-    """Le uma imagem colorida (BGR) de ``path``.
-
-    Usa ``np.fromfile`` + ``cv2.imdecode`` para funcionar com caminhos que
-    contem acentos no Windows (``cv2.imread`` falha nesses casos).
-    Retorna ``None`` quando o arquivo nao e uma imagem valida.
-    """
+    """Le uma imagem colorida (BGR) de ``path``. Retorna None caso imagem seja inválida. """
     path = Path(path)
     try:
         data = np.fromfile(str(path), dtype=np.uint8)
@@ -32,12 +24,7 @@ def read_image(path: str | Path) -> np.ndarray | None:
 
 
 class FolderDataloader(Dataloader):
-    """Carrega datasets com layout ``root/<identidade>/*.png|jpg|jpeg``.
-
-    Funciona com arquivos de imagem soltos (Spec 003 RF-02) e com datasets
-    publicos organizados por pastas de identidade (Spec 003 RF-01).
-    Arquivos fora dos formatos aceitos sao ignorados (Spec 002 RNF-01).
-    """
+    """Carrega datasets com layout ``root/<identidade>/*.png|jpg|jpeg``."""
 
     def __init__(
         self,

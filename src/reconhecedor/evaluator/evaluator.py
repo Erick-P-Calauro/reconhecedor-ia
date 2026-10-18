@@ -1,12 +1,10 @@
 """Persistencia das metricas por experimento (Spec 004 RNF-01)."""
 
 from __future__ import annotations
-
 import csv
 import json
 from datetime import datetime
 from pathlib import Path
-
 from ..types import PredictionRecord
 from .metrics import Metrics, compute_metrics
 
@@ -49,16 +47,8 @@ class Evaluator:
         config: dict | None = None,
         counts: dict | None = None,
     ) -> Path:
-        """RNF-01: grava as metricas em arquivo para consulta posterior.
-
-        - ``<output_dir>/<nome>/<timestamp>/metrics.json``: relatorio completo
-          da execucao.
-        - ``<output_dir>/metrics_history.csv``: historico agregado de todos os
-          experimentos (append).
-
-        Apenas metricas e agregados sao persistidos (Spec 003 RNF-02/RNF-03:
-        nenhum dado biometrico privado).
-        """
+        """RNF-01: grava as metricas em arquivo para consulta posterior."""
+        
         output_dir = Path(output_dir)
         timestamp = datetime.now()
         run_dir = output_dir / name / timestamp.strftime("%Y%m%d-%H%M%S")

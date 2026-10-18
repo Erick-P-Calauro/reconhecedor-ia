@@ -20,11 +20,8 @@ contagem correspondente.
 """
 
 from __future__ import annotations
-
 from dataclasses import asdict, dataclass
-
 from ..types import PredictionRecord
-
 
 @dataclass(frozen=True)
 class Metrics:

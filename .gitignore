@@ -1,5 +1,5 @@
 data/**
-private/**
+**/private/**
 logs/**
 models/**
 tests/**

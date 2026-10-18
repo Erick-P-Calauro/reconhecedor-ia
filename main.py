@@ -48,7 +48,7 @@ def _load_experiment(requested: str | None):
 
     names = discover_experiments()
     if not names:
-        print("Nenhum experimento encontrado em src/experiments/ (ADR 002).")
+        print("Nenhum experimento encontrado em src/experiments/ .")
         print("Crie uma subpasta dedicada com config.json e experiment.py.")
         return None, names
 

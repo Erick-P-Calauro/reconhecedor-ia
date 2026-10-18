@@ -1,12 +1,9 @@
 """Tipos compartilhados entre as camadas do pipeline (ADR 001)."""
 
 from __future__ import annotations
-
 from dataclasses import dataclass
 from pathlib import Path
-
 import numpy as np
-
 
 @dataclass(frozen=True, eq=False)
 class Sample:

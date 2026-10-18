@@ -1,5 +1,0 @@
-timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn,discarded_no_face
-
-2026-10-18T14:25:17,baseline,data\demo,baseline-hog,1.0,1.0,1.0,0.0,0.0,3,0,1,0,2
-2026-10-18T14:40:45,baseline,data/demo,baseline-hog,1.0,1.0,1.0,0.0,0.0,3,0,1,0,2
-2026-10-18T14:45:44,baseline,data/demo,baseline-hog,1.0,1.0,1.0,0.0,0.0,3,0,1,0,2

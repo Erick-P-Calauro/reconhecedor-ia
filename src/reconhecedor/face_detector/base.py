@@ -1,13 +1,9 @@
 """Interface da camada FaceDetector (ADR 001 / Spec 002)."""
 
 from __future__ import annotations
-
 from abc import ABC, abstractmethod
-
 import numpy as np
-
 from ..types import Detection
-
 
 class FaceDetector(ABC):
     """Camada responsavel pela funcionalidade de deteccao de faces.

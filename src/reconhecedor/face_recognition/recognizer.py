@@ -1,11 +1,8 @@
 """Comparacao de embeddings e reconhecimento de identidades (Spec 003)."""
 
 from __future__ import annotations
-
 import numpy as np
-
 from ..types import RecognitionResult
-
 
 class FaceRecognition:
     """Camada responsavel por comparar os embeddings faciais.
@@ -37,10 +34,7 @@ class FaceRecognition:
         self._gallery.setdefault(label, []).append(self._normalize(embedding))
 
     def identify(self, embedding: np.ndarray) -> RecognitionResult:
-        """Compara o embedding com o dominio e devolve a decisao de identidade.
-
-        Retorna ``predicted_label = None`` para desconhecidos (RF-04).
-        """
+        """Compara o embedding com o dominio e devolve a decisao de identidade. Retorna ``predicted_label = None`` para desconhecidos (RF-04)."""
         if not self._gallery:
             return RecognitionResult(predicted_label=None, similarity=0.0, best_label=None)
 

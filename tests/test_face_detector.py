@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
 from reconhecedor.face_detector import YuNetFaceDetector
 from reconhecedor.types import Detection
-
-ROOT = Path(__file__).resolve().parents[1]
-DEMO = ROOT / "data" / "demo"
 
 
 @pytest.fixture(scope="module")
@@ -61,31 +56,3 @@ def test_crop_clamps_to_image_borders(detector: YuNetFaceDetector):
     crop = detector.crop(image, detection, padding=0.5)
     assert crop is not None
     assert crop.shape[:2] == (50, 50)
-
-
-@pytest.mark.skipif(
-    not (DEMO / "gallery").is_dir(),
-    reason="dataset demo ausente: rode 'python main.py build-demo'",
-)
-def test_detects_face_in_demo_image(detector: YuNetFaceDetector):
-    from reconhecedor.dataloader import FolderDataloader
-
-    samples = FolderDataloader(DEMO / "gallery").load()
-    assert samples, "galeria do demo vazia"
-    detection = detector.detect(samples[0].image)
-    assert detection is not None
-    assert detection.score >= 0.6
-
-
-@pytest.mark.skipif(
-    not (DEMO / "probe").is_dir(),
-    reason="dataset demo ausente: rode 'python main.py build-demo'",
-)
-def test_demo_non_face_images_have_no_detection(detector: YuNetFaceDetector):
-    from reconhecedor.dataloader import FolderDataloader
-
-    samples = FolderDataloader(DEMO / "probe").load()
-    non_faces = [sample for sample in samples if sample.label == "_no_face"]
-    assert len(non_faces) == 2
-    for sample in non_faces:
-        assert detector.detect(sample.image) is None, f"face falsa em {sample.path}"

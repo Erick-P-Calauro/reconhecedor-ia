@@ -70,13 +70,13 @@ def test_save_writes_json_and_history(tmp_path: Path):
         metrics,
         name="exp-a",
         output_dir=tmp_path,
-        config={"dataset": "data/demo", "model": "baseline-hog"},
+        config={"dataset": "data/lfw", "model": "resnet50"},
         counts={"discarded_no_face": 3},
     )
 
     report = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
     assert report["experiment"]["name"] == "exp-a"
-    assert report["config"]["model"] == "baseline-hog"
+    assert report["config"]["model"] == "resnet50"
     assert report["counts"]["discarded_no_face"] == 3
     for key in ("accuracy", "precision", "recall", "far", "frr"):
         assert key in report["metrics"]

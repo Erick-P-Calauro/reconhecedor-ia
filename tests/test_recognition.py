@@ -8,9 +8,7 @@ import pytest
 from reconhecedor.face_recognition import FaceRecognition
 from reconhecedor.model import Model
 from reconhecedor.preprocessor import StandardPreProcessor
-
-# A implementacao baseline da Model e do experimento, nao da base (ADR 002).
-from experiments.baseline.hog_model import BaselineHogModel
+from support import StubEmbeddingModel
 
 
 def _face_like(size: int = 128, shift: int = 0, seed: int = 0) -> np.ndarray:
@@ -34,8 +32,8 @@ def test_preprocessor_output_is_fixed_grayscale_normalized():
         preprocessor.process(np.zeros((0, 0), dtype=np.uint8))
 
 
-def test_baseline_model_is_deterministic_and_l2_normalized():
-    model = BaselineHogModel()
+def test_model_is_deterministic_and_l2_normalized():
+    model = StubEmbeddingModel()
     assert isinstance(model, Model)  # interface comum (Spec 003 RNF-01)
     preprocessor = StandardPreProcessor(size=(128, 128))
     vector = model.embed(preprocessor.process(_face_like()))
@@ -46,7 +44,7 @@ def test_baseline_model_is_deterministic_and_l2_normalized():
 
 
 def test_model_embeds_black_image_without_error():
-    model = BaselineHogModel()
+    model = StubEmbeddingModel()
     vector = model.embed(np.zeros((128, 128), dtype=np.float32))
     assert np.isfinite(vector).all()
 

@@ -16,28 +16,6 @@ for _stream in (sys.stdout, sys.stderr):
         pass
 
 
-def cmd_build_demo(args: argparse.Namespace) -> int:
-    """Monta o dataset demo via ferramenta do experimento baseline (ADR 002).
-
-    A preparacao do dataset e implementacao do experimento, nao da base:
-    ``build-demo`` apenas delega a ``experiments.baseline.demo``.
-    """
-    try:
-        module = importlib.import_module("experiments.baseline.demo")
-    except ModuleNotFoundError as exc:
-        missing = exc.name or ""
-        if missing == "experiments" or missing.startswith("experiments."):
-            print("Ferramenta de dataset do experimento 'baseline' nao encontrada")
-            print(f"  esperado: src/experiments/baseline/demo.py (ausente: {missing})")
-            print("Crie a subpasta dedicada do experimento em src/experiments/ (ADR 002)")
-            print("ou verifique 'python main.py experiments'.")
-            return 1
-        raise
-
-    module.build_demo_dataset(args.dest)
-    return 0
-
-
 def _load_experiment(requested: str | None):
     """Importa ``experiments.<nome>.experiment`` (descoberta ADR 002).
 
@@ -54,9 +32,7 @@ def _load_experiment(requested: str | None):
 
     name = requested
     if name is None:
-        if "baseline" in names:
-            name = "baseline"
-        elif len(names) == 1:
+        if len(names) == 1:
             name = names[0]
         else:
             print("Mais de um experimento disponivel; use --experiment <nome>.")
@@ -183,15 +159,9 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-002)."
+        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-003)."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-
-    build_demo = subparsers.add_parser(
-        "build-demo", help="monta o dataset demo com imagens publicas em data/demo"
-    )
-    build_demo.add_argument("--dest", default="data/demo", help="pasta de destino (padrao: data/demo)")
-    build_demo.set_defaults(func=cmd_build_demo)
 
     experiments = subparsers.add_parser(
         "experiments", help="lista os experimentos de src/experiments/ (ADR 002)"
@@ -199,7 +169,9 @@ def build_parser() -> argparse.ArgumentParser:
     experiments.set_defaults(func=cmd_experiments)
 
     run = subparsers.add_parser("run", help="executa um experimento de src/experiments/ ponta a ponta")
-    run.add_argument("--experiment", "-e", default=None, help="experimento a executar (padrao: baseline)")
+    run.add_argument(
+        "--experiment", "-e", default=None, help="experimento a executar (padrao: unico disponivel)"
+    )
     run.add_argument("--dataset", default=None, help="sobrescreve o dataset da configuracao")
     run.add_argument("--threshold", type=float, default=None, help="sobrescreve o limiar de similaridade [0,1]")
     run.add_argument("--padding", type=float, default=None, help="sobrescreve a margem do recorte da face")

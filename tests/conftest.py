@@ -1,7 +1,7 @@
 """Fixture global: torna ``src/`` importavel nos testes.
 
-Os testes importam ``reconhecedor`` (camadas base) e ``experiments.baseline``
-(implementacao do experimento — ADR 002); ambos vivem sob ``src/``.
+Os testes importam ``reconhecedor`` (camadas base da ADR 001) e ``experiments``
+(experimentos da ADR 003); ambos vivem sob ``src/``.
 """
 
 from __future__ import annotations

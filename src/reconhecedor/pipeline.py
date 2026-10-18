@@ -1,17 +1,8 @@
-"""Orquestracao generica do fluxo da Spec 001 sobre as camadas da ADR 001.
-
-Esta pasta contem apenas a **implementacao base** das camadas e a
-orquestracao delas. A definicao de experimentos (configuracao, instanciação
-das camadas e resultados) fica em ``src/experiments/<nome>/`` (ADR 002).
-"""
+# Orquestração genérica do fluxo de reconhecimento facial e das camadas base do sistema
+# A definição dos experimentos fica em src/experiments
 
 from __future__ import annotations
-
-from dataclasses import dataclass
-from pathlib import Path
-
 import numpy as np
-
 from .dataloader.base import Dataloader
 from .evaluator.evaluator import Evaluator
 from .evaluator.metrics import Metrics
@@ -20,12 +11,11 @@ from .face_recognition.recognizer import FaceRecognition
 from .model.base import Model
 from .preprocessor.base import PreProcessor
 from .types import PredictionRecord, Sample
-
+from dataclasses import dataclass
+from pathlib import Path
 
 @dataclass
 class ExperimentResult:
-    """Resultado de uma execucao de pipeline/experimento."""
-
     metrics: Metrics
     run_dir: Path
     n_gallery: int
@@ -34,6 +24,8 @@ class ExperimentResult:
     discarded_probe: int
 
 
+# Detecta a face, recorta, pré-processa e gera embedding
+# FaceDetector, PreProcessor e Model devem ser substituídos em cada experimento
 def _face_embedding(
     sample: Sample,
     *,
@@ -42,10 +34,6 @@ def _face_embedding(
     model: Model,
     padding: float,
 ) -> np.ndarray | None:
-    """Spec 001/002: detecta a face, recorta, pre-processa e gera o embedding.
-
-    Retorna ``None`` quando nao ha face (RF-02: imagem descartada).
-    """
     detection = detector.detect(sample.image)
     if detection is None:
         return None
@@ -54,7 +42,7 @@ def _face_embedding(
         return None
     return model.embed(preprocessor.process(face))
 
-
+# Executa o pipeline completo com camadas recebidas por injeção de dependências
 def run_experiment(
     *,
     name: str,
@@ -70,19 +58,7 @@ def run_experiment(
     threshold: float,
     crop_padding: float,
 ) -> ExperimentResult:
-    """Executa o pipeline completo (Spec 001) e persiste as metricas.
-
-    As camadas chegam por injecao de dependencia: trocar a Model (ou qualquer
-    outra camada) nao exige alteracoes neste pipeline (Spec 003 RNF-01).
-    A configuracao do experimento (modelos, dataset, parametros) vem de
-    ``src/experiments/<nome>/config.json`` (ADR 002); aqui apenas orquestramos
-    a execucao e gravamos as metricas em ``output_dir`` (Spec 004 RNF-01).
-
-    ``output_dir``, ``threshold`` e ``crop_padding`` sao **obrigatorios**: a
-    base nao assume valores calibrados de experimento (ADR 002 — cada
-    experimento passa os seus, tipicamente lidos do proprio ``config.json``;
-    o resultado deve cair dentro de ``src/experiments/<nome>/results/``).
-    """
+    
     recognition = recognition if recognition is not None else FaceRecognition(threshold=threshold)
     evaluator = evaluator if evaluator is not None else Evaluator()
 

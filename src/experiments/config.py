@@ -51,16 +51,6 @@ class ExperimentConfig:
         """Resultados dentro da subpasta do experimento (ADR 002, característica 4)."""
         return self.directory / "results"
 
-    def to_dict(self) -> dict[str, Any]:
-        """Representacao serializavel (usada em relatorios e listagens)."""
-        return {
-            "name": self.name,
-            "dataset": str(self.dataset),
-            "face_detection_model": self.face_detection_model,
-            "face_recognition_model": self.face_recognition_model,
-            "parameters": dict(self.parameters),
-        }
-
 
 def load_config(path: str | Path) -> ExperimentConfig:
     """Carrega ``config.json`` de um experimento e valida suas chaves."""

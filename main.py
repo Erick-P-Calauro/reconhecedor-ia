@@ -1,20 +1,4 @@
-"""Entrypoint do reconhecedor-ia.
-
-Experimentos ficam em ``src/experiments/<nome>/`` com sua configuracao,
-seu wiring e seus resultados (ADR 002).
-
-Uso:
-    python main.py build-demo              # monta o dataset demo (do experimento
-                                           # baseline, em src/experiments/baseline/demo.py)
-    python main.py experiments             # lista os experimentos disponiveis
-    python main.py run                     # roda o experimento baseline
-    python main.py run --experiment baseline --dataset data/demo
-    python main.py metrics                 # consulta o historico de metricas
-    python main.py metrics --experiment baseline
-"""
-
 from __future__ import annotations
-
 import argparse
 import csv
 import importlib

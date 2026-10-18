@@ -27,11 +27,6 @@ class FaceRecognition:
         self._gallery: dict[str, list[np.ndarray]] = {}
 
     @property
-    def labels(self) -> list[str]:
-        """Identidades cadastradas no dominio."""
-        return sorted(self._gallery)
-
-    @property
     def name(self) -> str:
         return f"cosine-threshold-{self.threshold:.2f}"
 

@@ -1,4 +1,8 @@
-"""Fixture global: torna o pacote ``src/reconhecedor`` importavel nos testes."""
+"""Fixture global: torna ``src/`` importavel nos testes.
+
+Os testes importam ``reconhecedor`` (camadas base) e ``experiments.baseline``
+(implementacao do experimento — ADR 002); ambos vivem sob ``src/``.
+"""
 
 from __future__ import annotations
 

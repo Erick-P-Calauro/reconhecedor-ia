@@ -1,15 +1,15 @@
 {
   "experiment": {
     "name": "baseline",
-    "timestamp": "2026-10-18T12:23:50"
+    "timestamp": "2026-10-18T14:25:17"
   },
   "config": {
     "dataset": "data\\demo",
     "model": "baseline-hog",
     "face_detector": "yunet",
     "preprocessor": "standard-gray-128x128",
-    "recognition": "cosine-threshold-0.85",
-    "threshold": 0.85,
+    "recognition": "cosine-threshold-0.80",
+    "threshold": 0.8,
     "crop_padding": 0.25
   },
   "counts": {

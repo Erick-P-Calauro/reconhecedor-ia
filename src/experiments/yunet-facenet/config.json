@@ -1,0 +1,18 @@
+{
+  "name": "yunet-facenet",
+  "dataset": "data/lfw",
+  "face_detection_model": "yunet",
+  "face_recognition_model": "facenet",
+  "parameters": {
+    "threshold": 0.6,
+    "crop_padding": 0.25,
+    "image_size": 224
+  },
+  "dataset_parameters": {
+    "sample_size": 100,
+    "n_classes": 50,
+    "min_photos_per_class": 2,
+    "validation_ratio": 0.2,
+    "test_ratio": 0.8
+  }
+}

@@ -1,8 +1,4 @@
-"""Experimento ADR 003 — Deteccao YuNet + Reconhecimento ResNet50 (dataset LFW).
-
-Instancia as seis camadas da ADR 001 a partir de ``config.json`` (configuracao
-replicavel) e executa o pipeline; os resultados ficam em ``results/`` (ADR 002).
-"""
+"""Experimento ADR 003 — Deteccao YuNet + Reconhecimento ResNet50 (dataset LFW)."""
 
 from __future__ import annotations
 

@@ -7,8 +7,8 @@ Esta decisão foi tomada após testes com experimentos baseados no dataset lfw. 
 ## Decisão
 
 ### Definições 
- - São considerados datasets públicos quaisquer datasets externos que tem licença MIT.
- - São considerados datasets privados quaisquer datasets internos ou que não tem licença MIT.
+ - São considerados datasets públicos quaisquer datasets externos que podem ser utilizados com fins acadêmicos.
+ - São considerados datasets privados quaisquer datasets internos ou que não podem ser utilizados com fins acadêmicos.
 
 ### Características
  - Cada dataset tem um dataloader próprio, mesmo que tal dataset seja materializado.

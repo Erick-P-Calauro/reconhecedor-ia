@@ -33,6 +33,8 @@ class ExperimentConfig:
     face_detection_model: str
     face_recognition_model: str
     parameters: dict[str, Any] = field(default_factory=dict)
+    #: se True, resultados vao para ``<dir>/private/results`` (dataset privado, ADR 004).
+    private_dataset: bool = False
     #: subpasta dedicada do experimento (``src/experiments/<nome>/``).
     directory: Path = Path(".")
 
@@ -48,7 +50,12 @@ class ExperimentConfig:
 
     @property
     def results_dir(self) -> Path:
-        """Resultados dentro da subpasta do experimento (ADR 002, característica 4)."""
+        """Resultados dentro da subpasta do experimento (ADR 002, característica 4).
+
+        Datasets privados (ADR 004) gravam em ``private/results`` (gitignored).
+        """
+        if self.private_dataset:
+            return self.directory / "private" / "results"
         return self.directory / "results"
 
 
@@ -79,6 +86,7 @@ def load_config(path: str | Path) -> ExperimentConfig:
         face_detection_model=str(raw["face_detection_model"]),
         face_recognition_model=str(raw["face_recognition_model"]),
         parameters=dict(parameters),
+        private_dataset=bool(raw.get("private_dataset", False)),
         directory=path.parent,
     )
 

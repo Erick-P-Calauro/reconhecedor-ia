@@ -15,9 +15,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from experiments import lfw_dataset
 from experiments.config import ExperimentConfig, load_config
-from reconhecedor.dataloader import FolderDataloader
+from reconhecedor.dataloader import build_lfw_loaders, lfw_dataset
 from reconhecedor.evaluator import Evaluator
 from reconhecedor.face_detector import FaceNetDetector, YuNetFaceDetector
 from reconhecedor.face_recognition import FaceRecognition
@@ -59,16 +58,25 @@ def build_recognition(name: str, *, image_size: int):
     raise ValueError(f"face_recognition_model desconhecido: {name!r} (use 'resnet50' ou 'facenet')")
 
 
-def build_layers(config: ExperimentConfig, *, detector_model_path: str | Path | None = None) -> dict:
+def build_layers(
+    config: ExperimentConfig,
+    *,
+    detector_model_path: str | Path | None = None,
+    rematerialize: bool = False,
+) -> dict:
     """Monta o dicionario de camadas da ADR 001 exigido pelo pipeline."""
     params = config.parameters
     detector = build_detector(config.face_detection_model, detector_model_path=detector_model_path)
     model, preprocessor = build_recognition(
         config.face_recognition_model, image_size=int(params["image_size"])
     )
+    gallery_loader, probe_loader = build_lfw_loaders(
+        config.dataset,
+        rematerialize=rematerialize,
+    )
     return {
-        "gallery_loader": FolderDataloader(config.gallery_root),
-        "probe_loader": FolderDataloader(config.probe_root),
+        "gallery_loader": gallery_loader,
+        "probe_loader": probe_loader,
         "detector": detector,
         "preprocessor": preprocessor,
         "model": model,
@@ -86,6 +94,7 @@ def run(
     crop_padding: float | None = None,
     image_size: int | None = None,
     detector_model_path: str | Path | None = None,
+    rematerialize: bool = False,
 ) -> ExperimentResult:
     """Executa um experimento ponta a ponta a partir do seu ``config.json``.
 
@@ -103,9 +112,9 @@ def run(
         config.parameters["image_size"] = image_size
 
     # O dataset LFW e materializado sob demanda (RF-01: tratar datasets publicos).
-    lfw_dataset.ensure_dataset(config.dataset)
+    lfw_dataset.ensure_dataset(config.dataset, rematerialize=rematerialize)
 
-    layers = build_layers(config, detector_model_path=detector_model_path)
+    layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=False)
     return run_experiment(
         name=config.name,
         dataset=str(config.dataset),

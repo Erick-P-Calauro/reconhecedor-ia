@@ -12,15 +12,16 @@ sendo as ``n_known`` primeiras divididas entre galeria e probe (pessoas
 conhecidas) e as demais usadas apenas em probe (pessoas **desconhecidas**, para
 medir FAR/FRR - Spec 003 RF-04 / Spec 004).
 
-Este modulo e uma **ferramenta de dados compartilhada** pelos tres experimentos
-do ADR 003 (os tres usam o LFW). Nao e implementacao de camada, portanto nao
-fica em ``src/reconhecedor/`` (ADR 002); fica no pacote de experimentos para nao
-duplicar codigo entre as subpastas.
+E o preparador/artefato do dataloader especifico do LFW (ADR-004), que vive no
+pacote da camada Dataloader (``src/reconhecedor/dataloader/``), compartilhado
+pelos experimentos do ADR-003; depende de ``sklearn.datasets.fetch_lfw_people``
+(import lazy) e materializa o layout gallery/probe.
 """
 
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -64,6 +65,30 @@ def _has_images(path: Path) -> bool:
     )
 
 
+def resolve_data_home(root: str | Path | None = None, data_home: str | Path | None = None) -> str | Path:
+    """Escolhe um cache do sklearn que realmente contenha o LFW extraido.
+
+    Prefere um cache existente com pastas de pessoas; caso contrario, usa
+    ``root.parent`` (comportamento original) e remove pastas vazias para
+    permitir novo download.
+    """
+    if data_home is not None:
+        return data_home
+    if root is None:
+        root = DEFAULT_DATASET
+    root = Path(root)
+    candidates = [root.parent, root.parent / "lfw_home"]
+    for cand in candidates:
+        funneled = cand / "lfw_home" / "lfw_funneled"
+        if funneled.is_dir() and any(p.is_dir() for p in funneled.iterdir()):
+            return cand
+    cand = root.parent
+    funneled = cand / "lfw_home" / "lfw_funneled"
+    if funneled.exists() and not any(funneled.iterdir()):
+        shutil.rmtree(funneled, ignore_errors=True)
+    return cand
+
+
 def prepare_lfw(
     dataset_root: str | Path = DEFAULT_DATASET,
     *,
@@ -86,8 +111,9 @@ def prepare_lfw(
 
     root = Path(dataset_root)
     if data_home is None:
-        data_home = root.parent  # mantem o download/cache do sklearn dentro de data/
+        data_home = resolve_data_home(root)
 
+    print(f"[Dataloader] buscando LFW via sklearn (min_faces={min_faces_per_person}, identidades={n_identities})")
     bunch = fetch_lfw_people(
         data_home=str(data_home),
         funneled=True,
@@ -152,12 +178,32 @@ def prepare_lfw(
     return summary
 
 
-def ensure_dataset(dataset_root: str | Path = DEFAULT_DATASET, **kwargs) -> dict:
-    """Materializa o LFW se ainda nao existir; caso contrario, devolve o resumo."""
+
+
+def ensure_dataset(
+    dataset_root: str | Path = DEFAULT_DATASET,
+    *,
+    rematerialize: bool = False,
+    force: bool = False,
+    **kwargs,
+) -> dict:
+    """Materializa o LFW se ainda nao existir; caso contrario, devolve o resumo.
+
+    Com ``rematerialize``/``force`` True, re-materializa sempre (ADR 004).
+    ``**kwargs`` sao repassados a ``prepare_lfw``.
+    """
     root = Path(dataset_root)
     info_path = root / "dataset_info.json"
+    if rematerialize or force:
+        print(f"[Dataloader] re-materializando dataset em {root}")
+        summary = prepare_lfw(root, **kwargs)
+        print(f"[Dataloader] re-materializacao concluida: {summary.get('gallery_images')} gallery / {summary.get('probe_images')} probe")
+        return summary
     if _has_images(root / "gallery") and _has_images(root / "probe"):
         if info_path.is_file():
             return json.loads(info_path.read_text(encoding="utf-8"))
         return {"dataset_root": str(root), "status": "ja_materializado"}
-    return prepare_lfw(root, **kwargs)
+    print(f"[Dataloader] materializando dataset em {root}")
+    summary = prepare_lfw(root, **kwargs)
+    print(f"[Dataloader] materializacao concluida: {summary.get('gallery_images')} gallery / {summary.get('probe_images')} probe")
+    return summary

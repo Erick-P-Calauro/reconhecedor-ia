@@ -63,10 +63,13 @@ def run_experiment(
     evaluator = evaluator if evaluator is not None else Evaluator()
 
     # 1) Galeria: cadastra as pessoas do dominio (RF-03).
+    print("[pipeline] carregando galeria")
     gallery_samples = gallery_loader.load()
+    print(f"[pipeline] galeria: {len(gallery_samples)} imagens")
     discarded_gallery: list[Path] = []
     enrolled_ids: set[str] = set()
-    for sample in gallery_samples:
+    print("[pipeline] detectando faces na galeria")
+    for index, sample in enumerate(gallery_samples, 1):
         embedding = _face_embedding(
             sample, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
         )
@@ -75,11 +78,15 @@ def run_experiment(
             continue
         recognition.enroll(sample.label, embedding)
         enrolled_ids.add(sample.label)
+    print(f"[pipeline] galeria concluida: {len(enrolled_ids)} identidades, {len(discarded_gallery)} descartadas")
 
     # 2) Probe: reconhece ou classifica como desconhecido (RF-03/RF-04).
+    print("[pipeline] carregando probe")
     probe_samples = probe_loader.load()
+    print(f"[pipeline] probe: {len(probe_samples)} imagens")
     discarded_probe: list[Path] = []
     records: list[PredictionRecord] = []
+    print("[pipeline] detectando/identificando probe")
     for sample in probe_samples:
         embedding = _face_embedding(
             sample, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
@@ -96,8 +103,10 @@ def run_experiment(
                 similarity=result.similarity,
             )
         )
+    print(f"[pipeline] probe concluido: {len(records)} avaliadas, {len(discarded_probe)} descartadas")
 
     # 3) Avaliacao (Spec 004) + persistencia em arquivo (RNF-01).
+    print("[pipeline] avaliando e persistindo")
     metrics = evaluator.evaluate(records, enrolled_ids)
     config_info = {
         "dataset": str(dataset),

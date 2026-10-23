@@ -25,11 +25,13 @@ class ResNet50Model(Model):
     """ResNet50 (ImageNet) como extrator de caracteristicas faciais."""
 
     def __init__(self, weights: ResNet50_Weights = DEFAULT_WEIGHTS, device: str | None = None) -> None:
+        print("[Model] inicializando")
         self._device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         network = resnet50(weights=weights, progress=False)
         network.fc = nn.Identity()  # descarta a classificacao: mantem as features
         network.eval()
         self._network = network.to(self._device)
+        print("[Model] inicializado")
 
     @property
     def name(self) -> str:

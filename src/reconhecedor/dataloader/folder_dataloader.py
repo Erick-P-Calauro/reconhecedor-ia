@@ -31,10 +31,13 @@ class FolderDataloader(Dataloader):
         root: str | Path,
         extensions: tuple[str, ...] = DEFAULT_EXTENSIONS,
     ) -> None:
+        print("[Dataloader] inicializando")
         self.root = Path(root)
         self.extensions = tuple(ext.lower() for ext in extensions)
+        print("[Dataloader] inicializado")
 
     def load(self) -> list[Sample]:
+        print(f"[Dataloader] carregando: {self.root}")
         if not self.root.is_dir():
             raise FileNotFoundError(f"Dataset nao encontrado: {self.root}")
 
@@ -49,4 +52,5 @@ class FolderDataloader(Dataloader):
                     print(f"[dataloader] ignorando arquivo ilegivel: {path}")
                     continue
                 samples.append(Sample(path=path, image=image, label=label))
+        print(f"[Dataloader] {len(samples)} samples carregados")
         return samples

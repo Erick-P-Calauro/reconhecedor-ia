@@ -55,11 +55,13 @@ class YuNetFaceDetector(FaceDetector):
         nms_threshold: float = 0.3,
         top_k: int = 5000,
     ) -> None:
+        print("[FaceDetector] inicializando")
         self.model_path = ensure_model(model_path)
         self.score_threshold = float(score_threshold)
         self._nms_threshold = float(nms_threshold)
         self._top_k = int(top_k)
         self._detector: cv2.FaceDetectorYN | None = None
+        print("[FaceDetector] inicializado")
 
     @property
     def name(self) -> str:

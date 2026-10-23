@@ -35,9 +35,11 @@ class FaceNetDetector(FaceDetector):
         device: str | None = None,
         min_probability: float = DEFAULT_MIN_PROBABILITY,
     ) -> None:
+        print("[FaceDetector] inicializando")
         self._device = device
         self.min_probability = float(min_probability)
         self._mtcnn = None  # cache da instancia MTCNN
+        print("[FaceDetector] inicializado")
 
     @property
     def name(self) -> str:

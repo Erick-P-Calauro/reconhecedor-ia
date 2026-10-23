@@ -14,3 +14,4 @@ Esta decisão foi tomada após testes com experimentos baseados no dataset lfw. 
  - Cada dataset tem um dataloader próprio, mesmo que tal dataset seja materializado.
  - Cada dataset deve providenciar opção de execução direta, sem materialização.
  - Cada dataset deve providenciar opção de re-materialização via argumentos.
+ - Datasets privados não devem ser disponibilizados via git, sendo seus arquivos resultantes (embeds, datasets e derivados) ignorados via .gitignore.

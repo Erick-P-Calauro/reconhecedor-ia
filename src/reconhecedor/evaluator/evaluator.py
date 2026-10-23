@@ -30,13 +30,20 @@ HISTORY_FIELDS = [
 class Evaluator:
     """Camada responsavel por gerar metricas e avaliar um experimento."""
 
+    def __init__(self) -> None:
+        print("[Evaluator] inicializando")
+        print("[Evaluator] inicializado")
+
     def evaluate(
         self,
         records: list[PredictionRecord],
         enrolled_labels: list[str] | set[str],
     ) -> Metrics:
         """RF-01: gera as metricas (RF-02..RF-06) de um experimento."""
-        return compute_metrics(records, enrolled_labels)
+        print("[Evaluator] avaliando")
+        metrics = compute_metrics(records, enrolled_labels)
+        print("[Evaluator] avaliacao concluida")
+        return metrics
 
     def save(
         self,
@@ -48,7 +55,7 @@ class Evaluator:
         counts: dict | None = None,
     ) -> Path:
         """RNF-01: grava as metricas em arquivo para consulta posterior."""
-        
+        print("[Evaluator] salvando resultados")
         output_dir = Path(output_dir)
         timestamp = datetime.now()
         run_dir = output_dir / name / timestamp.strftime("%Y%m%d-%H%M%S")
@@ -65,6 +72,7 @@ class Evaluator:
             encoding="utf-8",
         )
         self._append_history(output_dir / HISTORY_FILENAME, payload)
+        print(f"[Evaluator] resultados salvos em {run_dir}")
         return run_dir
 
     @staticmethod

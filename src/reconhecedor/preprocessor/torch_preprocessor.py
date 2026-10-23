@@ -39,12 +39,14 @@ class TorchPreProcessor(PreProcessor):
         std: tuple[float, float, float] = IMAGENET_STD,
         name: str = "torch",
     ) -> None:
+        print("[PreProcessor] inicializando")
         if size[0] <= 0 or size[1] <= 0:
             raise ValueError("size deve ter dimensoes positivas")
         self.size = (int(size[0]), int(size[1]))  # (largura, altura)
         self.mean = np.asarray(mean, dtype=np.float32).reshape(3, 1, 1)
         self.std = np.asarray(std, dtype=np.float32).reshape(3, 1, 1)
         self._name = name
+        print("[PreProcessor] inicializado")
 
     @property
     def name(self) -> str:

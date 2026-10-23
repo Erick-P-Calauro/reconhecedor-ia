@@ -16,9 +16,11 @@ class StandardPreProcessor(PreProcessor):
     """
 
     def __init__(self, size: tuple[int, int] = (128, 128)) -> None:
+        print("[PreProcessor] inicializando")
         if size[0] <= 0 or size[1] <= 0:
             raise ValueError("size deve ter dimensoes positivas")
         self.size = (int(size[0]), int(size[1]))  # (largura, altura)
+        print("[PreProcessor] inicializado")
 
     @property
     def name(self) -> str:

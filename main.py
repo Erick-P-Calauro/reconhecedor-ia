@@ -89,6 +89,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             "crop_padding": args.padding,
             "image_size": args.image_size,
             "detector_model_path": args.detector_model,
+            "rematerialize": args.rematerialize if getattr(args, "rematerialize", False) else None,
         }.items()
         if value is not None
     }
@@ -118,6 +119,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 def cmd_metrics(args: argparse.Namespace) -> int:
     from experiments import discover_experiments, experiment_dir
+    from experiments.config import load_config
     from reconhecedor.evaluator.evaluator import HISTORY_FILENAME
 
     names = discover_experiments()
@@ -132,7 +134,8 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     printed_any = False
     for name in names:
         # ADR 002 (caracteristica 4): o historico vive na subpasta do experimento.
-        history_path = experiment_dir(name) / "results" / HISTORY_FILENAME
+        config = load_config(experiment_dir(name))
+        history_path = config.results_dir / HISTORY_FILENAME
         if not history_path.is_file():
             continue
 
@@ -159,7 +162,7 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-003)."
+        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-005)."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -177,6 +180,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--padding", type=float, default=None, help="sobrescreve a margem do recorte da face")
     run.add_argument("--image-size", type=int, default=None, help="sobrescreve o lado do quadrado pre-processado")
     run.add_argument("--detector-model", default=None, help="caminho alternativo do modelo do detector")
+    run.add_argument("--rematerialize", action="store_true", help="re-materializa o dataset (ADR 004)")
     run.set_defaults(func=cmd_run)
 
     metrics = subparsers.add_parser(

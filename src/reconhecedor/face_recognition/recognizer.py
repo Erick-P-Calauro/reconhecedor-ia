@@ -18,10 +18,12 @@ class FaceRecognition:
     """
 
     def __init__(self, threshold: float) -> None:
+        print("[FaceRecognition] inicializando")
         if not 0.0 <= threshold <= 1.0:
             raise ValueError("threshold deve estar em [0, 1]")
         self.threshold = float(threshold)
         self._gallery: dict[str, list[np.ndarray]] = {}
+        print("[FaceRecognition] inicializado")
 
     @property
     def name(self) -> str:

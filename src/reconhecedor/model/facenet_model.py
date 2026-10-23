@@ -35,10 +35,12 @@ class FaceNetModel(Model):
     """
 
     def __init__(self, device: str | None = None) -> None:
+        print("[Model] inicializando")
         self._device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         self._network = (
             InceptionResnetV1(pretrained="vggface2", classify=False).eval().to(self._device)
         )
+        print("[Model] inicializado")
 
     @property
     def name(self) -> str:

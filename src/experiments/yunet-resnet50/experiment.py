@@ -33,6 +33,7 @@ def run(
     crop_padding=None,
     image_size=None,
     detector_model_path=None,
+    rematerialize=False,
 ) -> ExperimentResult:
     """Executa o experimento ponta a ponta, gravando em ``config.results_dir``."""
     return layers.run(
@@ -43,4 +44,5 @@ def run(
         crop_padding=crop_padding,
         image_size=image_size,
         detector_model_path=detector_model_path,
+        rematerialize=rematerialize,
     )

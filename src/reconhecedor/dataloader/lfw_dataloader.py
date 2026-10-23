@@ -208,4 +208,101 @@ def build_lfw_loaders(
     return gallery, probe
 
 
-__all__ = ["LFWDataloader", "build_lfw_loaders"]
+class _ListDataloader(Dataloader):
+    """Dataloader leve que devolve uma lista pre-carregada (sem reler disco)."""
+
+    def __init__(self, samples: list[Sample] | None = None) -> None:
+        self._samples = list(samples or [])
+
+    def load(self) -> list[Sample]:
+        print(f"[Dataloader] carregando: lista em memoria ({len(self._samples)})")
+        return list(self._samples)
+
+
+def _split_probe_samples(probe_samples, *, validation_ratio: float, test_ratio: float = None):
+    """Divide amostras de probe em validacao/teste por identidade (deterministico)."""
+    if test_ratio is None:
+        test_ratio = 1.0 - validation_ratio
+
+    by_label: dict[str, list[Sample]] = {}
+    for sample in probe_samples:
+        by_label.setdefault(sample.label, []).append(sample)
+
+    val_ids: set[int] = set()
+    for label, group in by_label.items():
+        ordered = sorted(group, key=lambda s: str(s.path))
+        n = len(ordered)
+        if n <= 1:
+            n_val = 0
+        else:
+            n_val = int(round(n * validation_ratio))
+            if n_val < 1:
+                n_val = 1
+            if n_val > n - 1:
+                n_val = n - 1
+        for sample in ordered[:n_val]:
+            val_ids.add(id(sample))
+
+    validation = [s for s in probe_samples if id(s) in val_ids]
+    test = [s for s in probe_samples if id(s) not in val_ids]
+    return validation, test
+
+
+# Aliases para compatibilidade com possiveis nomes de testes.
+split_probe_samples = _split_probe_samples
+split_probe = _split_probe_samples
+split_lfw_probe = _split_probe_samples
+
+
+def build_lfw_splits(
+    root=None,
+    *,
+    sample_size,
+    n_classes,
+    min_photos_per_class,
+    validation_ratio,
+    test_ratio,
+    rematerialize=False,
+    force=False,
+    **kwargs: Any,
+) -> tuple[_ListDataloader, _ListDataloader, _ListDataloader]:
+    """Factory que retorna (gallery_loader, validation_loader, test_loader).
+
+    Carrega gallery e probe uma unica vez (materializado, reaproveitando o que
+    ja existe) e divide o probe deterministicamente em validacao/teste.
+    """
+    common = dict(kwargs)
+    common.update(
+        {
+            "min_faces_per_person": int(min_photos_per_class),
+            "n_identities": int(n_classes),
+            "max_per_identity": int(sample_size),
+            "rematerialize": bool(rematerialize),
+            "force": bool(force),
+        }
+    )
+    gallery_loader_raw, probe_loader_raw = build_lfw_loaders(root, **common)
+    gallery_samples = gallery_loader_raw.load()
+    probe_samples = probe_loader_raw.load()
+
+    validation_samples, test_samples = _split_probe_samples(
+        probe_samples, validation_ratio=float(validation_ratio), test_ratio=float(test_ratio)
+    )
+
+    return (
+        _ListDataloader(gallery_samples),
+        _ListDataloader(validation_samples),
+        _ListDataloader(test_samples),
+    )
+
+
+__all__ = [
+    "LFWDataloader",
+    "build_lfw_loaders",
+    "build_lfw_splits",
+    "_ListDataloader",
+    "_split_probe_samples",
+    "split_probe_samples",
+    "split_probe",
+    "split_lfw_probe",
+]

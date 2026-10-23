@@ -16,7 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from experiments.config import ExperimentConfig, load_config
-from reconhecedor.dataloader import build_lfw_loaders, lfw_dataset
+from reconhecedor.dataloader import build_lfw_loaders, build_lfw_splits, lfw_dataset
 from reconhecedor.evaluator import Evaluator
 from reconhecedor.face_detector import FaceNetDetector, YuNetFaceDetector
 from reconhecedor.face_recognition import FaceRecognition
@@ -70,13 +70,19 @@ def build_layers(
     model, preprocessor = build_recognition(
         config.face_recognition_model, image_size=int(params["image_size"])
     )
-    gallery_loader, probe_loader = build_lfw_loaders(
+    gallery_loader, validation_loader, test_loader = build_lfw_splits(
         config.dataset,
+        sample_size=config.sample_size,
+        n_classes=config.n_classes,
+        min_photos_per_class=config.min_photos_per_class,
+        validation_ratio=config.validation_ratio,
+        test_ratio=config.test_ratio,
         rematerialize=rematerialize,
     )
     return {
         "gallery_loader": gallery_loader,
-        "probe_loader": probe_loader,
+        "validation_loader": validation_loader,
+        "test_loader": test_loader,
         "detector": detector,
         "preprocessor": preprocessor,
         "model": model,
@@ -95,6 +101,11 @@ def run(
     image_size: int | None = None,
     detector_model_path: str | Path | None = None,
     rematerialize: bool = False,
+    sample_size: int | None = None,
+    n_classes: int | None = None,
+    min_photos_per_class: int | None = None,
+    validation_ratio: float | None = None,
+    test_ratio: float | None = None,
 ) -> ExperimentResult:
     """Executa um experimento ponta a ponta a partir do seu ``config.json``.
 
@@ -110,16 +121,37 @@ def run(
         config.parameters["crop_padding"] = crop_padding
     if image_size is not None:
         config.parameters["image_size"] = image_size
+    if sample_size is not None:
+        config.sample_size = sample_size
+    if n_classes is not None:
+        config.n_classes = n_classes
+    if min_photos_per_class is not None:
+        config.min_photos_per_class = min_photos_per_class
+    if validation_ratio is not None:
+        config.validation_ratio = validation_ratio
+    if test_ratio is not None:
+        config.test_ratio = test_ratio
 
     # O dataset LFW e materializado sob demanda.
-    lfw_dataset.ensure_dataset(config.dataset, rematerialize=rematerialize)
+    lfw_dataset.ensure_dataset(
+        config.dataset,
+        rematerialize=rematerialize,
+        max_per_identity=config.sample_size,
+        n_identities=config.n_classes,
+        min_faces_per_person=config.min_photos_per_class,
+    )
 
-    layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=False)
+    layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=rematerialize)
     return run_experiment(
         name=config.name,
         dataset=str(config.dataset),
         output_dir=output_dir or config.results_dir,
         threshold=float(config.parameters["threshold"]),
         crop_padding=float(config.parameters["crop_padding"]),
+        sample_size=config.sample_size,
+        n_classes=config.n_classes,
+        min_photos_per_class=config.min_photos_per_class,
+        validation_ratio=config.validation_ratio,
+        test_ratio=config.test_ratio,
         **layers,
     )

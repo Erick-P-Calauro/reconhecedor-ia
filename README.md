@@ -15,7 +15,7 @@ O pipeline é implementado por meio de uma arquitetura em camadas, cada uma com 
 
 | Camada           | Pacote                | Responsabilidade                                      |
 |------------------|-----------------------|-------------------------------------------------------|
-| Dataloader       | `dataloader/`         | Carregar imagens de datasets públicos ou por arquivos (`.png/.jpg/.jpeg`)     |
+| Dataloader       | `dataloader/`         | Carregar imagens de datasets públicos ou por arquivos (`.png/.jpg/.jpeg`). Gallery armazena as pessoas conhecidas pelo sistema e probe os conjuntos de teste e validação.     |
 | FaceDetector     | `face_detector/`      | Detectar faces, descartar imagens sem face, recortar imagens com face para simplificação da imagem. |
 | PreProcessor     | `preprocessor/`       | Padronizar a entrada da Model|
 | Model            | `model/`              | Gerar o embedding facial (interface `Model`;) |
@@ -47,6 +47,12 @@ python main.py run
 
 # Consulta o histórico de métricas (na subpasta de cada experimento)
 python main.py metrics
+
+# Consulta informações sobre utilização do sistema
+python main.py help
+
+# Consulta informações sobre utilização do comando run
+python main.py run help
 ```
 
 ### Parâmetros

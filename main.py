@@ -71,6 +71,15 @@ def cmd_experiments(args: argparse.Namespace) -> int:
                 params.get("image_size"),
             )
         )
+        print(
+            "  dataset_parameters: sample_size={} n_classes={} min_photos_per_class={} validation_ratio={} test_ratio={}".format(
+                config.sample_size,
+                config.n_classes,
+                config.min_photos_per_class,
+                config.validation_ratio,
+                config.test_ratio,
+            )
+        )
         print(f"  resultados: {config.results_dir}")
         print()
     return 0
@@ -90,6 +99,11 @@ def cmd_run(args: argparse.Namespace) -> int:
             "image_size": args.image_size,
             "detector_model_path": args.detector_model,
             "rematerialize": args.rematerialize if getattr(args, "rematerialize", False) else None,
+            "sample_size": args.sample_size,
+            "n_classes": args.n_classes,
+            "min_photos_per_class": args.min_photos_per_class,
+            "validation_ratio": args.validation_ratio,
+            "test_ratio": args.test_ratio,
         }.items()
         if value is not None
     }
@@ -101,10 +115,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     print()
     print(f"Experimento '{config.name}' concluido")
     print(f"  config: {module.CONFIG_PATH}")
-    print(f"  galeria: {result.n_gallery} imagens | probe: {result.n_probe} imagens")
-    print(f"  descartadas sem face: {result.discarded_gallery + result.discarded_probe}")
+    print(f"  galeria: {result.n_gallery} imagens | validacao: {result.n_validation} imagens | teste: {result.n_test} imagens")
+    print(f"  descartadas sem face: {result.discarded_gallery + result.discarded_validation + result.discarded_test}")
     print(
-        "  acuracia={accuracy:.4f} precisao={precision:.4f} recall={recall:.4f} "
+        "  teste: acuracia={accuracy:.4f} precisao={precision:.4f} recall={recall:.4f} "
         "FAR={far:.4f} FRR={frr:.4f}".format(
             accuracy=metrics.accuracy,
             precision=metrics.precision,
@@ -113,6 +127,18 @@ def cmd_run(args: argparse.Namespace) -> int:
             frr=metrics.frr,
         )
     )
+    if result.validation_metrics is not None:
+        vm = result.validation_metrics
+        print(
+            "  validacao: acuracia={accuracy:.4f} precisao={precision:.4f} recall={recall:.4f} "
+            "FAR={far:.4f} FRR={frr:.4f}".format(
+                accuracy=vm.accuracy,
+                precision=vm.precision,
+                recall=vm.recall,
+                far=vm.far,
+                frr=vm.frr,
+            )
+        )
     print(f"  metricas salvas em: {result.run_dir}")
     return 0
 
@@ -160,18 +186,60 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Pipeline de reconhecimento facial replicavel (spec 001-004, ADR 001-005)."
+class FriendlyArgumentParser(argparse.ArgumentParser):
+    """ArgumentParser que anexa dica de ``help`` aos erros de parsing."""
+
+    def error(self, message: str) -> None:  # type: ignore[override]
+        self.print_usage(sys.stderr)
+        self.exit(
+            2,
+            f"{self.prog}: error: {message}\n"
+            "Use 'python main.py help' para ver os comandos disponíveis.\n",
+        )
+
+
+def cmd_help(args: argparse.Namespace) -> int:
+    parser = args._parser
+    command_parsers = getattr(parser, "_command_parsers", {})
+    command_help = getattr(parser, "_command_help", {})
+    names = list(command_parsers)
+
+    requested = getattr(args, "command_name", None)
+    if requested is None:
+        print("Comandos disponíveis:")
+        for name in names:
+            print(f"  {name}  {command_help.get(name, '')}")
+        print()
+        parser.print_help()
+        return 0
+
+    if requested not in command_parsers:
+        print(f"Comando desconhecido: {requested}")
+        print(f"Comandos válidos: {', '.join(names)}")
+        return 1
+
+    command_parsers[requested].print_help()
+    return 0
+
+
+def build_parser() -> FriendlyArgumentParser:
+    parser = FriendlyArgumentParser(
+        description="Pipeline de reconhecimento facial replicavel (spec 001-005, ADR 001-006)."
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, parser_class=FriendlyArgumentParser
+    )
 
     experiments = subparsers.add_parser(
-        "experiments", help="lista os experimentos de src/experiments/ (ADR 002)"
+        "experiments",
+        help="lista os experimentos de src/experiments/ (ADR 002)",
     )
     experiments.set_defaults(func=cmd_experiments)
 
-    run = subparsers.add_parser("run", help="executa um experimento de src/experiments/ ponta a ponta")
+    run = subparsers.add_parser(
+        "run",
+        help="executa um experimento de src/experiments/ ponta a ponta",
+    )
     run.add_argument(
         "--experiment", "-e", default=None, help="experimento a executar (padrao: unico disponivel)"
     )
@@ -181,13 +249,41 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--image-size", type=int, default=None, help="sobrescreve o lado do quadrado pre-processado")
     run.add_argument("--detector-model", default=None, help="caminho alternativo do modelo do detector")
     run.add_argument("--rematerialize", action="store_true", help="re-materializa o dataset (ADR 004)")
+    run.add_argument("--sample-size", type=int, default=None, help="tamanho da amostra (max imagens por classe)")
+    run.add_argument("--n-classes", type=int, default=None, help="quantidade de classes")
+    run.add_argument("--min-photos-per-class", type=int, default=None, help="fotos minimas por classe")
+    run.add_argument("--validation-ratio", type=float, default=None, help="proporcao de validacao")
+    run.add_argument("--test-ratio", type=float, default=None, help="proporcao de teste")
     run.set_defaults(func=cmd_run)
 
     metrics = subparsers.add_parser(
-        "metrics", help="lista o historico de metricas de src/experiments/<nome>/results/"
+        "metrics",
+        help="lista o historico de metricas de src/experiments/<nome>/results/",
     )
     metrics.add_argument("--experiment", "-e", default=None, help="restringe a um experimento")
     metrics.set_defaults(func=cmd_metrics)
+
+    help_parser = subparsers.add_parser(
+        "help",
+        help="aglutina e explica todos os comandos disponíveis",
+    )
+    help_parser.add_argument(
+        "command_name", nargs="?", default=None, help="comando para detalhar (opcional)"
+    )
+    help_parser.set_defaults(func=cmd_help, _parser=parser)
+
+    parser._command_parsers = {
+        "experiments": experiments,
+        "run": run,
+        "metrics": metrics,
+        "help": help_parser,
+    }
+    parser._command_help = {
+        "experiments": "lista os experimentos de src/experiments/ (ADR 002)",
+        "run": "executa um experimento de src/experiments/ ponta a ponta",
+        "metrics": "lista o historico de metricas de src/experiments/<nome>/results/",
+        "help": "aglutina e explica todos os comandos disponíveis",
+    }
 
     return parser
 

@@ -53,6 +53,8 @@ class Evaluator:
         output_dir: str | Path,
         config: dict | None = None,
         counts: dict | None = None,
+        validation_metrics: Metrics | None = None,
+        validation_counts: dict | None = None,
     ) -> Path:
         """Grava as metricas em arquivo para consulta posterior."""
         print("[Evaluator] salvando resultados")
@@ -67,6 +69,10 @@ class Evaluator:
             "counts": counts or {},
             "metrics": metrics.to_dict(),
         }
+        if validation_metrics is not None:
+            payload["validation_metrics"] = validation_metrics.to_dict()
+        if validation_counts is not None:
+            payload["validation_counts"] = validation_counts
         (run_dir / "metrics.json").write_text(
             json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",

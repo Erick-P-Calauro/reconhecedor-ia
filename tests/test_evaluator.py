@@ -89,3 +89,26 @@ def test_save_writes_json_and_history(tmp_path: Path):
         rows = list(csv.DictReader(handle))
     assert [row["experiment"] for row in rows] == ["exp-a", "exp-b"]
     assert float(rows[0]["accuracy"]) == 0.6
+
+
+def test_save_with_validation_metrics(tmp_path: Path):
+    evaluator = Evaluator()
+    metrics = evaluator.evaluate(_sample_records(), {"alice"})
+    vmetrics = evaluator.evaluate(_sample_records(), {"alice"})
+    run_dir = evaluator.save(
+        metrics,
+        name="exp-v",
+        output_dir=tmp_path,
+        config={"dataset": "data/lfw", "model": "resnet50"},
+        counts={"discarded_no_face": 3},
+        validation_metrics=vmetrics,
+        validation_counts={"validation_samples": 5},
+    )
+    report = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
+    assert "validation_metrics" in report
+    assert "validation_counts" in report
+    # CSV unchanged (no validation columns)
+    history = tmp_path / "metrics_history.csv"
+    with history.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert "validation_metrics" not in rows[0]

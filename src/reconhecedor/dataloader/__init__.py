@@ -3,12 +3,14 @@
 from .base import Dataloader
 from .folder_dataloader import FolderDataloader
 from . import lfw_dataset
-from .lfw_dataloader import LFWDataloader, build_lfw_loaders
+from .lfw_dataloader import LFWDataloader, build_lfw_loaders, build_lfw_splits, _ListDataloader
 
 __all__ = [
     "Dataloader",
     "FolderDataloader",
     "LFWDataloader",
     "build_lfw_loaders",
+    "build_lfw_splits",
+    "_ListDataloader",
     "lfw_dataset",
 ]

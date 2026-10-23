@@ -1,0 +1,74 @@
+{
+  "experiment": {
+    "name": "facenet-facenet",
+    "timestamp": "2026-10-23T16:42:49"
+  },
+  "config": {
+    "dataset": "data/lfw",
+    "model": "facenet",
+    "face_detector": "facenet",
+    "preprocessor": "facenet-160x160",
+    "recognition": "cosine-threshold-0.50",
+    "threshold": 0.5,
+    "crop_padding": 0.25,
+    "sample_size": 350,
+    "n_classes": 50,
+    "min_photos_per_class": 2,
+    "validation_ratio": 0.5,
+    "test_ratio": 0.8,
+    "dataset_parameters": {
+      "sample_size": 350,
+      "n_classes": 50,
+      "min_photos_per_class": 2,
+      "validation_ratio": 0.5,
+      "test_ratio": 0.8
+    }
+  },
+  "counts": {
+    "gallery_samples": 776,
+    "gallery_enrolled": 7,
+    "probe_samples": 1794,
+    "validation_samples": 897,
+    "validation_evaluated": 897,
+    "test_samples": 897,
+    "probe_evaluated": 897,
+    "discarded_no_face": 0,
+    "discarded_gallery": 0,
+    "discarded_probe": 0,
+    "discarded_validation": 0,
+    "discarded_test": 0,
+    "tp": 160,
+    "fp": 27,
+    "tn": 704,
+    "fn": 6
+  },
+  "metrics": {
+    "accuracy": 0.963211,
+    "precision": 0.855615,
+    "recall": 0.963855,
+    "far": 0.036936,
+    "frr": 0.036145,
+    "tp": 160,
+    "fp": 27,
+    "tn": 704,
+    "fn": 6,
+    "total": 897
+  },
+  "validation_metrics": {
+    "accuracy": 0.968785,
+    "precision": 0.867021,
+    "recall": 0.981928,
+    "far": 0.0342,
+    "frr": 0.018072,
+    "tp": 163,
+    "fp": 25,
+    "tn": 706,
+    "fn": 3,
+    "total": 897
+  },
+  "validation_counts": {
+    "validation_samples": 897,
+    "validation_evaluated": 897,
+    "discarded_validation": 0
+  }
+}

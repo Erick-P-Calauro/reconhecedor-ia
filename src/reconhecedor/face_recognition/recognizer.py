@@ -7,9 +7,9 @@ from ..types import RecognitionResult
 class FaceRecognition:
     """Camada responsavel por comparar os embeddings faciais.
 
-    - RF-03: pessoas previamente inseridas no dominio sao reconhecidas
+    - pessoas previamente inseridas no dominio sao reconhecidas
       (``enroll`` + maior similaridade de cosseno >= limiar).
-    - RF-04: pessoas fora do dominio sao classificadas como desconhecidas
+    - pessoas fora do dominio sao classificadas como desconhecidas
       (similaridade abaixo do limiar => ``predicted_label = None``).
 
     ``threshold`` e **obrigatorio**: a pasta base nao calibra limiar de
@@ -36,7 +36,7 @@ class FaceRecognition:
         self._gallery.setdefault(label, []).append(self._normalize(embedding))
 
     def identify(self, embedding: np.ndarray) -> RecognitionResult:
-        """Compara o embedding com o dominio e devolve a decisao de identidade. Retorna ``predicted_label = None`` para desconhecidos (RF-04)."""
+        """Compara o embedding com o dominio e devolve a decisao de identidade. Retorna ``predicted_label = None`` para desconhecidos."""
         if not self._gallery:
             return RecognitionResult(predicted_label=None, similarity=0.0, best_label=None)
 

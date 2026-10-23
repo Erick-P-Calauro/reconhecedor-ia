@@ -1,4 +1,4 @@
-"""Persistencia das metricas por experimento (Spec 004 RNF-01)."""
+"""Persistencia das metricas por experimento (Spec 004)."""
 
 from __future__ import annotations
 import csv
@@ -39,7 +39,7 @@ class Evaluator:
         records: list[PredictionRecord],
         enrolled_labels: list[str] | set[str],
     ) -> Metrics:
-        """RF-01: gera as metricas (RF-02..RF-06) de um experimento."""
+        """Gera as metricas de um experimento."""
         print("[Evaluator] avaliando")
         metrics = compute_metrics(records, enrolled_labels)
         print("[Evaluator] avaliacao concluida")
@@ -54,7 +54,7 @@ class Evaluator:
         config: dict | None = None,
         counts: dict | None = None,
     ) -> Path:
-        """RNF-01: grava as metricas em arquivo para consulta posterior."""
+        """Grava as metricas em arquivo para consulta posterior."""
         print("[Evaluator] salvando resultados")
         output_dir = Path(output_dir)
         timestamp = datetime.now()

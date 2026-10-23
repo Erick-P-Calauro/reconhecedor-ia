@@ -18,7 +18,7 @@ def _write(path: Path, ext: str) -> None:
 
 
 def test_loads_png_jpg_jpeg_and_labels_by_folder(tmp_path: Path):
-    """Spec 002 RNF-01 (.png/.jpg/.jpeg) + RF-01 (identidade da pasta)."""
+    """Spec 002: formatos .png/.jpg/.jpeg + identidade da pasta."""
     _write(tmp_path / "alice" / "a1", ".png")
     _write(tmp_path / "alice" / "a2", ".jpg")
     _write(tmp_path / "bob" / "b1", ".jpeg")

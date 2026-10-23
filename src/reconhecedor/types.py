@@ -30,7 +30,7 @@ class RecognitionResult:
     """Resultado da comparacao de embeddings pela camada FaceRecognition.
 
     ``predicted_label`` e ``None`` quando a pessoa e desconhecida
-    (fora do dominio cadastrado - Spec 003 RF-04).
+    (fora do dominio cadastrado - Spec 003).
     """
 
     predicted_label: str | None

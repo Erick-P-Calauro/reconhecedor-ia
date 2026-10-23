@@ -44,8 +44,8 @@ class YuNetFaceDetector(FaceDetector):
     """FaceDetector baseado no YuNet (Spec 002).
 
     Leve (ONNX ~230 KB executado pelo proprio OpenCV), com limiar de
-    confianca configuravel. Retorna ``None`` quando nao ha face (RF-01),
-    permitindo ao pipeline descartar a imagem (RF-02).
+    confianca configuravel. Retorna ``None`` quando nao ha face,
+    permitindo ao pipeline descartar a imagem.
     """
 
     def __init__(

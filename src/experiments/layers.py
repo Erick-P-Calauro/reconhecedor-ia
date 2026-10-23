@@ -3,7 +3,7 @@
 Concentra a construcao das camadas a partir dos **nomes** declarados no
 ``config.json`` (``face_detection_model`` / ``face_recognition_model``), de modo
 que trocar de modelo/detector seja apenas questao de editar a configuracao
-(Spec 003 RNF-01, ADR 002).
+(Spec 003, ADR 002).
 
 Vive no pacote de experimentos (e nao na base ``src/reconhecedor/``) por ser
 *wiring* de experimento; as classes concretas usadas sao genericas e ficam na
@@ -111,7 +111,7 @@ def run(
     if image_size is not None:
         config.parameters["image_size"] = image_size
 
-    # O dataset LFW e materializado sob demanda (RF-01: tratar datasets publicos).
+    # O dataset LFW e materializado sob demanda.
     lfw_dataset.ensure_dataset(config.dataset, rematerialize=rematerialize)
 
     layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=False)

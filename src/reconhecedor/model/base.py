@@ -1,4 +1,4 @@
-"""Interface da camada Model (ADR 001 / Spec 003 RNF-01)."""
+"""Interface da camada Model (ADR 001 / Spec 003)."""
 
 from __future__ import annotations
 from abc import ABC, abstractmethod

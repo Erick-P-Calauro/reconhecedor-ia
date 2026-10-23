@@ -8,9 +8,9 @@ from ..types import Detection
 class FaceDetector(ABC):
     """Camada responsavel pela funcionalidade de deteccao de faces.
 
-    - RF-01: verificar se uma imagem contem faces.
-    - RF-02: imagens sem face sao descartadas pelo pipeline (retornar ``None``).
-    - RF-03: ``crop`` recorta a imagem para conter apenas a face.
+    - verifica se uma imagem contem faces.
+    - imagens sem face sao descartadas pelo pipeline (retornar ``None``).
+    - ``crop`` recorta a imagem para conter apenas a face.
     """
 
     @abstractmethod
@@ -23,7 +23,7 @@ class FaceDetector(ABC):
         detection: Detection | None,
         padding: float = 0.25,
     ) -> np.ndarray | None:
-        """RF-03: recorta a regiao da face (com margem de contexto) da imagem.
+        """Recorta a regiao da face (com margem de contexto) da imagem.
 
         ``padding`` e a fracao da largura/altura da caixa adicionada em cada
         lado, para nao cortar a face tao rente.

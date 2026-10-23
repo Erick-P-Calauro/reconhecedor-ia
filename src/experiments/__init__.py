@@ -5,7 +5,7 @@ contendo:
 
 - ``config.json``    — configuracao replicavel (modelos, dataset, parametros);
 - ``experiment.py``  — instanciação de cada camada da ADR 001 (wiring);
-- ``results/``       — resultados verificaveis da replicacao (Spec 004 RNF-01).
+- ``results/``       — resultados verificaveis da replicacao (Spec 004).
 
 Nenhuma implementacao de experimento fica em ``src/reconhecedor/`` (pasta base
 das camadas da ADR 001).

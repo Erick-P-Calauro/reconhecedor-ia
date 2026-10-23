@@ -4,10 +4,10 @@ O detector que acompanha a FaceNet no ``facenet-pytorch`` e o **MTCNN** (Zhang e
 al., 2016). Mantendo o nome literal ``"facenet"`` exigido pelo ADR 003, este
 ``FaceNetDetector`` usa o MTCNN (pesos embutidos na propria biblioteca, sem
 download) para localizar a face mais confiavel da imagem e devolve ``None``
-abaixo de ``min_probability`` (Spec 002 RF-02). O recorte para conter so a face
-(RF-03) e herdado de ``FaceDetector.crop``, como no ``YuNetFaceDetector`` — o
+abaixo de ``min_probability`` (Spec 002). O recorte para conter so a face
+e herdado de ``FaceDetector.crop``, como no ``YuNetFaceDetector`` — o
 detector nao recorta por conta propria. A troca de detector (config.json) segue
-a interface comum (Spec 003 RNF-01).
+a interface comum (Spec 003).
 """
 
 from __future__ import annotations

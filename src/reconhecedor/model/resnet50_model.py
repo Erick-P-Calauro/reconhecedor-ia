@@ -4,7 +4,7 @@ Implementacao **generica** da camada Model: usa a ResNet50 pre-treinada em
 ImageNet (pesos ``torchvision``) sem a camada de classificacao. O vetor de 2048
 dimensoes do pooling global e usado como embedding facial. Reutilizavel por
 qualquer experimento cujo ``face_recognition_model`` seja ``resnet50`` (ADR 002,
-ADR 003), sem alterar o pipeline (Spec 003 RNF-01).
+ADR 003), sem alterar o pipeline (Spec 003).
 """
 
 from __future__ import annotations

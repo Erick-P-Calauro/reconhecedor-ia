@@ -1,4 +1,4 @@
-"""Metricas de avaliacao de experimentos (Spec 004 RF-02..RF-06).
+"""Metricas de avaliacao de experimentos (Spec 004).
 
 Definicoes binarias "aceitar/recusar" sobre cada imagem de probe:
 
@@ -9,11 +9,11 @@ Definicoes binarias "aceitar/recusar" sobre cada imagem de probe:
   -> FAR.
 - ``TN`` (verdadeiro negativo): pessoa desconhecida recusada.
 
-- acurácia  = (TP + TN) / total          (RF-02)
-- precisao  = TP / (TP + FP)             (RF-03)
-- recall    = TP / (TP + FN)             (RF-04)
-- FAR       = FP / (FP + TN)             (RF-05)
-- FRR       = FN / (FN + TP)             (RF-06)
+- acurácia  = (TP + TN) / total
+- precisao  = TP / (TP + FP)
+- recall    = TP / (TP + FN)
+- FAR       = FP / (FP + TN)
+- FRR       = FN / (FN + TP)
 
 Divisao por zero (conjunto vazio) resulta em 0.0, com o total zerado na
 contagem correspondente.

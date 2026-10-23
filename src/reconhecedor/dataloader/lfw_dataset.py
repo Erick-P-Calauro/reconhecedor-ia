@@ -4,13 +4,13 @@ Baixa o *Labeled Faces in the Wild* com ``sklearn.datasets.fetch_lfw_people`` e
 **materializa** os dados no layout esperado pela camada Dataloader
 (``FolderDataloader`` / base do sistema):
 
-    <dataset>/gallery/<identidade>/*.png   (pessoas cadastradas  - Spec 003 RF-03)
-    <dataset>/probe/<identidade>/*.png     (sondas/reconhecimento - Spec 003 RF-04)
+    <dataset>/gallery/<identidade>/*.png   (pessoas cadastradas  - Spec 003)
+    <dataset>/probe/<identidade>/*.png     (sondas/reconhecimento - Spec 003)
 
 Recorte adotado (documentado no log 009): identidades com mais imagens no LFW,
 sendo as ``n_known`` primeiras divididas entre galeria e probe (pessoas
 conhecidas) e as demais usadas apenas em probe (pessoas **desconhecidas**, para
-medir FAR/FRR - Spec 003 RF-04 / Spec 004).
+medir FAR/FRR - Spec 003 / Spec 004).
 
 E o preparador/artefato do dataloader especifico do LFW (ADR-004), que vive no
 pacote da camada Dataloader (``src/reconhecedor/dataloader/``), compartilhado

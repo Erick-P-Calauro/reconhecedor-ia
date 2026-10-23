@@ -39,7 +39,7 @@ pip install -r requirements.txt
 
 ```powershell
 
-# Lista os experimentos de src/experiments/ (ADR 002)
+# Lista os experimentos de src/experiments/
 python main.py experiments
 
 # Roda o experimento baseline de ponta a ponta

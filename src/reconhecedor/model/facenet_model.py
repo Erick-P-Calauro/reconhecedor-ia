@@ -6,7 +6,7 @@ para carregar a FaceNet (Schroff et al., 2015) pre-treinada no **VGGFace2** com
 baixa/gerencia o checkpoint no cache do torch (``~/.cache/torch/checkpoints``).
 Reutilizavel por qualquer experimento cujo ``face_recognition_model`` seja
 ``facenet`` (ADR 002, ADR 003); a troca de modelo nao exige mudar o pipeline
-(Spec 003 RNF-01).
+(Spec 003).
 
 A saida e um embedding de 512 dimensoes com norma L2 unitaria. A entrada esperada
 e a saida do ``TorchPreProcessor`` preset FaceNet: CHW ``float32`` em ``[-1, 1]``

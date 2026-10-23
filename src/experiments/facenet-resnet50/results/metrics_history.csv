@@ -1,3 +1,4 @@
 timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn,discarded_no_face
 2026-10-18T17:09:01,facenet-resnet50,data/lfw,resnet50,0.096386,0.1,0.44898,0.99,0.55102,22,198,2,27,0
 2026-10-18T17:27:04,facenet-resnet50,data/lfw,resnet50,0.096386,0.1,0.44898,0.99,0.55102,22,198,2,27,0
+2026-10-23T15:39:22,facenet-resnet50,data/lfw,resnet50,0.124498,0.127753,0.591837,0.99,0.408163,29,198,2,20,0

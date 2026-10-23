@@ -24,7 +24,7 @@ FACENET_STD = (0.5, 0.5, 0.5)
 
 
 class TorchPreProcessor(PreProcessor):
-    """Prepara o recorte da face para uma CNN PyTorch (Spec 002 RF-03).
+    """Prepara o recorte da face para uma CNN PyTorch (Spec 002).
 
     - converte BGR -> RGB (convencao torchvision);
     - redimensiona para ``size`` (largura, altura);

@@ -34,7 +34,7 @@ def test_preprocessor_output_is_fixed_grayscale_normalized():
 
 def test_model_is_deterministic_and_l2_normalized():
     model = StubEmbeddingModel()
-    assert isinstance(model, Model)  # interface comum (Spec 003 RNF-01)
+    assert isinstance(model, Model)  # interface comum (Spec 003)
     preprocessor = StandardPreProcessor(size=(128, 128))
     vector = model.embed(preprocessor.process(_face_like()))
     again = model.embed(preprocessor.process(_face_like()))
@@ -50,7 +50,7 @@ def test_model_embeds_black_image_without_error():
 
 
 def test_recognizes_enrolled_person():
-    """Spec 003 RF-03: pessoa cadastrada e reconhecida."""
+    """Spec 003: pessoa cadastrada e reconhecida."""
     recognition = FaceRecognition(threshold=0.5)
     recognition.enroll("alice", np.array([1.0, 0.0, 0.0]))
     recognition.enroll("bob", np.array([0.0, 1.0, 0.0]))
@@ -62,7 +62,7 @@ def test_recognizes_enrolled_person():
 
 
 def test_classifies_unknown_person():
-    """Spec 003 RF-04: fora do dominio -> desconhecido (predicted None)."""
+    """Spec 003: fora do dominio -> desconhecido (predicted None)."""
     recognition = FaceRecognition(threshold=0.5)
     recognition.enroll("alice", np.array([1.0, 0.0, 0.0]))
 

@@ -40,12 +40,12 @@ class ExperimentConfig:
 
     @property
     def gallery_root(self) -> Path:
-        """Galeria do dataset (Spec 003 RF-03: pessoas cadastradas)."""
+        """Galeria do dataset (Spec 003: pessoas cadastradas)."""
         return Path(self.dataset) / "gallery"
 
     @property
     def probe_root(self) -> Path:
-        """Sondas do dataset (Spec 003 RF-04: fora da galeria = desconhecido)."""
+        """Sondas do dataset (Spec 003: fora da galeria = desconhecido)."""
         return Path(self.dataset) / "probe"
 
     @property

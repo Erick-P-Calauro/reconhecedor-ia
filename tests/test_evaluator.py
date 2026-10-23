@@ -1,4 +1,4 @@
-"""Testes das metricas do experimento (Spec 004 RF-02..RF-06 e RNF-01)."""
+"""Testes das metricas do experimento (Spec 004)."""
 
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ def test_metrics_values():
     assert (metrics.tp, metrics.fp, metrics.tn, metrics.fn) == (2, 1, 1, 1)
     assert metrics.total == 5
     assert metrics.accuracy == 0.6  # (TP + TN) / 5
-    assert round(metrics.precision, 6) == round(2 / 3, 6)  # RF-03
-    assert round(metrics.recall, 6) == round(2 / 3, 6)  # RF-04
-    assert metrics.far == 0.5  # RF-05: 1 / (1 + 1)
-    assert round(metrics.frr, 6) == round(1 / 3, 6)  # RF-06: 1 / (1 + 2)
+    assert round(metrics.precision, 6) == round(2 / 3, 6)
+    assert round(metrics.recall, 6) == round(2 / 3, 6)
+    assert metrics.far == 0.5  # 1 / (1 + 1)
+    assert round(metrics.frr, 6) == round(1 / 3, 6)  # 1 / (1 + 2)
 
 
 def test_wrong_identity_counts_as_false_negative():

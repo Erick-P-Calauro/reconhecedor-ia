@@ -7,7 +7,7 @@ import numpy as np
 from ..types import Sample
 from .base import Dataloader
 
-#: Formatos aceitos pela Spec 002 RNF-01.
+#: Formatos de imagem aceitos pelo Dataloader.
 DEFAULT_EXTENSIONS = (".png", ".jpg", ".jpeg")
 
 

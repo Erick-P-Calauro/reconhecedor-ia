@@ -62,7 +62,7 @@ def run_experiment(
     recognition = recognition if recognition is not None else FaceRecognition(threshold=threshold)
     evaluator = evaluator if evaluator is not None else Evaluator()
 
-    # 1) Galeria: cadastra as pessoas do dominio (RF-03).
+    # 1) Galeria: cadastra as pessoas do dominio.
     print("[pipeline] carregando galeria")
     gallery_samples = gallery_loader.load()
     print(f"[pipeline] galeria: {len(gallery_samples)} imagens")
@@ -80,7 +80,7 @@ def run_experiment(
         enrolled_ids.add(sample.label)
     print(f"[pipeline] galeria concluida: {len(enrolled_ids)} identidades, {len(discarded_gallery)} descartadas")
 
-    # 2) Probe: reconhece ou classifica como desconhecido (RF-03/RF-04).
+    # 2) Probe: reconhece ou classifica como desconhecido.
     print("[pipeline] carregando probe")
     probe_samples = probe_loader.load()
     print(f"[pipeline] probe: {len(probe_samples)} imagens")
@@ -92,7 +92,7 @@ def run_experiment(
             sample, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
         )
         if embedding is None:
-            discarded_probe.append(sample.path)  # RF-02
+            discarded_probe.append(sample.path)
             continue
         result = recognition.identify(embedding)
         records.append(
@@ -105,7 +105,7 @@ def run_experiment(
         )
     print(f"[pipeline] probe concluido: {len(records)} avaliadas, {len(discarded_probe)} descartadas")
 
-    # 3) Avaliacao (Spec 004) + persistencia em arquivo (RNF-01).
+    # 3) Avaliacao (Spec 004) + persistencia em arquivo.
     print("[pipeline] avaliando e persistindo")
     metrics = evaluator.evaluate(records, enrolled_ids)
     config_info = {

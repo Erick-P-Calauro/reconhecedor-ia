@@ -1,4 +1,4 @@
-"""Testes da camada FaceDetector (Spec 002 RF-01..RF-03)."""
+"""Testes da camada FaceDetector (Spec 002)."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ def _noise_image(seed: int = 42, size: int = 256) -> np.ndarray:
 
 
 def test_detects_no_face_in_noise(detector: YuNetFaceDetector):
-    """RF-01: imagem sem face -> detector sinaliza ausencia (retorna None)."""
+    """Imagem sem face -> detector sinaliza ausencia (retorna None)."""
     assert detector.detect(_noise_image()) is None
 
 
@@ -33,14 +33,14 @@ def test_detects_no_face_in_empty_image(detector: YuNetFaceDetector):
 
 
 def test_crop_returns_none_without_detection(detector: YuNetFaceDetector):
-    """RF-02: pipeline usa None para descartar; crop nunca e chamado."""
+    """Pipeline usa None para descartar; crop nunca e chamado."""
     image = _noise_image()
     assert detector.detect(image) is None
     assert detector.crop(image, None) is None
 
 
 def test_crop_returns_only_face_region(detector: YuNetFaceDetector):
-    """RF-03: recorte contem a face com margem e nao excede a imagem."""
+    """Recorte contem a face com margem e nao excede a imagem."""
     image = np.full((300, 400, 3), 128, dtype=np.uint8)
     detection = Detection(x=100, y=80, w=80, h=100, score=0.99)
     crop = detector.crop(image, detection, padding=0.25)

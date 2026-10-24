@@ -1,0 +1,2 @@
+timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn,discarded_no_face
+2026-10-24T17:49:28,private-yunet-facenet,data/private,facenet,0.999254,1.0,0.9375,0.0,0.0625,15,0,1325,1,0

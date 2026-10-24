@@ -16,13 +16,14 @@ from __future__ import annotations
 from pathlib import Path
 
 from experiments.config import ExperimentConfig, load_config
-from reconhecedor.dataloader import build_lfw_loaders, build_lfw_splits, build_lfw_splits_finetune, lfw_dataset
+from reconhecedor.dataloader import build_lfw_splits, build_lfw_splits_finetune, lfw_dataset
 from reconhecedor.evaluator import Evaluator
 from reconhecedor.face_detector import FaceNetDetector, YuNetFaceDetector
 from reconhecedor.face_recognition import FaceRecognition
 from reconhecedor.model import FaceNetModel, ResNet50Model
 from reconhecedor.pipeline import ExperimentResult, run_experiment
 from reconhecedor.preprocessor import TorchPreProcessor
+import reconhecedor.dataloader.private_dataloader as private_dataset
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
@@ -82,16 +83,28 @@ def build_layers(
             rematerialize=rematerialize,
         )
     else:
-        gallery_loader, validation_loader, test_loader = build_lfw_splits(
-            config.dataset,
-            sample_size=config.sample_size,
-            n_classes=config.n_classes,
-            min_photos_per_class=config.min_photos_per_class,
-            validation_ratio=config.validation_ratio,
-            test_ratio=config.test_ratio,
-            rematerialize=rematerialize,
-        )
-        train_loader = None
+        if(config.dataset == "data/lfw"):
+            gallery_loader, validation_loader, test_loader = build_lfw_splits(
+                config.dataset,
+                sample_size=config.sample_size,
+                n_classes=config.n_classes,
+                min_photos_per_class=config.min_photos_per_class,
+                validation_ratio=config.validation_ratio,
+                test_ratio=config.test_ratio,
+                rematerialize=rematerialize,
+            )
+            train_loader = None
+        else:
+            gallery_loader, validation_loader, test_loader = private_dataset.build_private_splits(
+                config.dataset,
+                sample_size=config.sample_size,
+                n_classes=config.n_classes,
+                min_photos_per_class=config.min_photos_per_class,
+                validation_ratio=config.validation_ratio,
+                test_ratio=config.test_ratio,
+                rematerialize=rematerialize,
+            )
+            train_loader = None
     return {
         "gallery_loader": gallery_loader,
         "train_loader": train_loader,
@@ -152,13 +165,22 @@ def run(
         config.train_ratio = train_ratio
 
     # O dataset LFW e materializado sob demanda.
-    lfw_dataset.ensure_dataset(
-        config.dataset,
-        rematerialize=rematerialize,
-        max_per_identity=config.sample_size,
-        n_identities=config.n_classes,
-        min_faces_per_person=config.min_photos_per_class,
-    )
+    if(config.dataset == "data/lfw"):
+        lfw_dataset.ensure_dataset(
+            config.dataset,
+            rematerialize=rematerialize,
+            max_per_identity=config.sample_size,
+            n_identities=config.n_classes,
+            min_faces_per_person=config.min_photos_per_class,
+        )
+    else:
+        private_dataset.ensure_dataset(
+            config.dataset,
+            rematerialize=rematerialize,
+            max_per_identity=config.sample_size,
+            n_identities=config.n_classes,
+            min_faces_per_person=config.min_photos_per_class,
+        )
 
     if fine_tune_epochs is None:
         fine_tune_epochs = int(config.parameters.get("fine_tune_epochs", 5))

@@ -11,3 +11,4 @@ Adotando a definição de experimento contida em "002-experiment-definition", se
  - Público : (Detecção:FaceNet; Reconhecimento: ResNet50 [via torchvision]; Dataset: Labeled Faces In The Wild [via Scikit-learn])
  - Público : (Detecção:FaceNet; Reconhecimento: FaceNet ; Dataset: Labeled Faces In The Wild [via Scikit-learn])
  - Público : (Detecção:Yunet; Reconhecimento: FaceNet ; Dataset: Labeled Faces In The Wild [via Scikit-learn])
+ - Público : (Detecção, Yunet; Reconhecimento : RestNet50 (FineTuned); Dataset: Labeled Faces In The Wild [via Scikit-learn])

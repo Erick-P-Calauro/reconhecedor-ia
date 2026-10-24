@@ -39,6 +39,7 @@ class ExperimentConfig:
     min_photos_per_class: int = 4
     validation_ratio: float = 0.5
     test_ratio: float = 0.5
+    train_ratio: float | None = None
     #: se True, resultados vao para ``<dir>/private/results`` (dataset privado, ADR 004).
     private_dataset: bool = False
     #: subpasta dedicada do experimento (``src/experiments/<nome>/``).
@@ -100,6 +101,10 @@ def load_config(path: str | Path) -> ExperimentConfig:
         test_ratio = dataset_parameters.get("test_ratio")
     else:
         test_ratio = 1 - validation_ratio
+    if "train_ratio" in dataset_parameters and dataset_parameters.get("train_ratio") is not None:
+        train_ratio = dataset_parameters.get("train_ratio")
+    else:
+        train_ratio = None
 
     try:
         sample_size = int(sample_size)
@@ -107,6 +112,8 @@ def load_config(path: str | Path) -> ExperimentConfig:
         min_photos_per_class = int(min_photos_per_class)
         validation_ratio = float(validation_ratio)
         test_ratio = float(test_ratio)
+        if train_ratio is not None:
+            train_ratio = float(train_ratio)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"'dataset_parameters' invalido em {path}: {exc}") from exc
 
@@ -120,10 +127,18 @@ def load_config(path: str | Path) -> ExperimentConfig:
         raise ValueError(f"'validation_ratio' deve estar em [0, 1] em {path}")
     if not (0.0 <= test_ratio <= 1.0):
         raise ValueError(f"'test_ratio' deve estar em [0, 1] em {path}")
-    if abs(validation_ratio + test_ratio - 1.0) > 1e-6:
-        raise ValueError(f"'validation_ratio' + 'test_ratio' deve ser ~ 1.0 em {path}")
-    if validation_ratio <= 0 or test_ratio <= 0:
-        raise ValueError(f"'validation_ratio' e 'test_ratio' devem ser > 0 em {path}")
+    if train_ratio is not None:
+        if not (0.0 <= train_ratio <= 1.0):
+            raise ValueError(f"'train_ratio' deve estar em [0, 1] em {path}")
+        if abs(train_ratio + validation_ratio + test_ratio - 1.0) > 1e-6:
+            raise ValueError(f"'train_ratio' + 'validation_ratio' + 'test_ratio' deve ser ~ 1.0 em {path}")
+        if train_ratio <= 0 or validation_ratio <= 0 or test_ratio <= 0:
+            raise ValueError(f"'train_ratio', 'validation_ratio' e 'test_ratio' devem ser > 0 em {path}")
+    else:
+        if abs(validation_ratio + test_ratio - 1.0) > 1e-6:
+            raise ValueError(f"'validation_ratio' + 'test_ratio' deve ser ~ 1.0 em {path}")
+        if validation_ratio <= 0 or test_ratio <= 0:
+            raise ValueError(f"'validation_ratio' e 'test_ratio' devem ser > 0 em {path}")
 
     return ExperimentConfig(
         name=str(raw["name"]),
@@ -136,6 +151,7 @@ def load_config(path: str | Path) -> ExperimentConfig:
         min_photos_per_class=min_photos_per_class,
         validation_ratio=validation_ratio,
         test_ratio=test_ratio,
+        train_ratio=train_ratio,
         private_dataset=bool(raw.get("private_dataset", False)),
         directory=path.parent,
     )

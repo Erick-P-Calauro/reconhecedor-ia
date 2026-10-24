@@ -46,3 +46,4 @@ class PredictionRecord:
     true_label: str
     predicted_label: str | None
     similarity: float
+    best_label: str | None = None

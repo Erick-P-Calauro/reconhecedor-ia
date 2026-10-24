@@ -50,6 +50,10 @@ class FaceNetModel(Model):
     def output_dim(self) -> int:
         return 512
 
+    @property
+    def is_fine_tunable(self) -> bool:
+        return False
+
     def embed(self, image: np.ndarray) -> np.ndarray:
         batch = to_batch(image, self._device)
         with torch.no_grad():

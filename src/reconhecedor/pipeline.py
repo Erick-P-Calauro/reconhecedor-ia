@@ -6,6 +6,7 @@ import numpy as np
 from .dataloader.base import Dataloader
 from .evaluator.evaluator import Evaluator
 from .evaluator.metrics import Metrics
+from .evaluator.threshold_optimizer import ThresholdOptimizer
 from .face_detector.base import FaceDetector
 from .face_recognition.recognizer import FaceRecognition
 from .model.base import Model
@@ -27,6 +28,10 @@ class ExperimentResult:
     n_test: int = 0
     discarded_validation: int = 0
     discarded_test: int = 0
+    n_train: int = 0
+    discarded_train: int = 0
+    threshold_used: float | None = None
+    optimization_info: object = None
 
 
 # Detecta a face, recorta, pré-processa e gera embedding
@@ -69,6 +74,7 @@ def _process_loader(loader, *, detector, preprocessor, model, recognition, crop_
                 true_label=sample.label,
                 predicted_label=result.predicted_label,
                 similarity=result.similarity,
+                best_label=result.best_label,
             )
         )
     return samples, records, discarded
@@ -95,6 +101,10 @@ def run_experiment(
     min_photos_per_class=None,
     validation_ratio=None,
     test_ratio=None,
+    train_ratio=None,
+    train_loader: Dataloader | None = None,
+    fine_tune_epochs: int = 5,
+    learning_rate: float = 1e-4,
 ) -> ExperimentResult:
     
     recognition = recognition if recognition is not None else FaceRecognition(threshold=threshold)
@@ -104,7 +114,36 @@ def run_experiment(
         test_loader = probe_loader
     has_validation = validation_loader is not None
 
-    # 1) Galeria: cadastra as pessoas do dominio.
+    # 0) Treino / fine-tuning (opcional, antes da galeria).
+    train_samples: list = []
+    discarded_train: list[Path] = []
+    n_train = 0
+    if train_loader is not None:
+        print("[pipeline] carregando treino")
+        train_samples = train_loader.load()
+        n_train = len(train_samples)
+        print(f"[pipeline] treino: {len(train_samples)} imagens")
+        discarded_train = [
+            s.path
+            for s in train_samples
+            if _face_embedding(
+                s, detector=detector, preprocessor=preprocessor, model=model, padding=crop_padding
+            )
+            is None
+        ]
+        if getattr(model, "is_fine_tunable", False):
+            model.fine_tune(
+                train_samples,
+                detector=detector,
+                preprocessor=preprocessor,
+                crop_padding=crop_padding,
+                epochs=fine_tune_epochs,
+                lr=learning_rate,
+            )
+        else:
+            print("[pipeline] modelo nao permite fine-tuning; treino ignorado")
+
+    # 1) Galeria: cadastra as pessoas do dominio (apos fine-tuning, se houver).
     print("[pipeline] carregando galeria")
     gallery_samples = gallery_loader.load()
     print(f"[pipeline] galeria: {len(gallery_samples)} imagens")
@@ -122,11 +161,13 @@ def run_experiment(
         enrolled_ids.add(sample.label)
     print(f"[pipeline] galeria concluida: {len(enrolled_ids)} identidades, {len(discarded_gallery)} descartadas")
 
-    # 2) Validacao (opcional).
+    # 2) Validacao (opcional) + otimizacao de threshold.
     validation_samples: list = []
     validation_records: list[PredictionRecord] = []
     discarded_validation: list[Path] = []
     validation_metrics: Metrics | None = None
+    threshold_used: float | None = None
+    optimization_info = None
     if has_validation:
         print("[pipeline] carregando validacao")
         validation_samples, validation_records, discarded_validation = _process_loader(
@@ -139,8 +180,45 @@ def run_experiment(
         )
         print(f"[pipeline] validacao: {len(validation_samples)} imagens")
         print(f"[pipeline] validacao concluida: {len(validation_records)} avaliadas, {len(discarded_validation)} descartadas")
-        print("[pipeline] avaliando validacao")
-        validation_metrics = evaluator.evaluate(validation_records, enrolled_ids)
+        print("[pipeline] otimizando threshold na validacao")
+        optimizer = ThresholdOptimizer()
+        opt_result = optimizer.optimize(validation_records, enrolled_ids)
+        if opt_result is None:
+            threshold_used = threshold
+            optimization_info = None
+            print(f"[pipeline] threshold mantido: {threshold_used}")
+        elif hasattr(opt_result, "threshold"):
+            threshold_used = float(opt_result.threshold)
+            optimization_info = opt_result
+            try:
+                recognition.threshold = float(threshold_used)
+            except Exception:
+                pass
+            print(f"[pipeline] threshold otimizado: {threshold_used}")
+        elif isinstance(opt_result, tuple):
+            threshold_used = float(opt_result[0])
+            optimization_info = opt_result[1] if len(opt_result) > 1 else opt_result[0]
+            try:
+                recognition.threshold = float(threshold_used)
+            except Exception:
+                pass
+            print(f"[pipeline] threshold otimizado: {threshold_used}")
+        elif isinstance(opt_result, dict):
+            threshold_used = float(opt_result.get("threshold", opt_result.get("best_threshold", threshold)))
+            optimization_info = opt_result
+            try:
+                recognition.threshold = float(threshold_used)
+            except Exception:
+                pass
+            print(f"[pipeline] threshold otimizado: {threshold_used}")
+        else:
+            threshold_used = float(opt_result)
+            optimization_info = opt_result
+            try:
+                recognition.threshold = float(threshold_used)
+            except Exception:
+                pass
+            print(f"[pipeline] threshold otimizado: {threshold_used}")
 
     # 3) Teste.
     print("[pipeline] carregando teste")
@@ -165,23 +243,25 @@ def run_experiment(
         "preprocessor": preprocessor.name,
         "recognition": recognition.name,
         "threshold": threshold,
+        "threshold_used": threshold_used,
         "crop_padding": crop_padding,
         "sample_size": sample_size,
         "n_classes": n_classes,
         "min_photos_per_class": min_photos_per_class,
         "validation_ratio": validation_ratio,
         "test_ratio": test_ratio,
+        "train_ratio": train_ratio,
         "dataset_parameters": {
             "sample_size": sample_size,
             "n_classes": n_classes,
             "min_photos_per_class": min_photos_per_class,
             "validation_ratio": validation_ratio,
             "test_ratio": test_ratio,
+            "train_ratio": train_ratio,
         },
     }
     n_validation = len(validation_samples)
     n_test = len(test_samples)
-    # n_probe = soma validacao+teste (ou probe, quando nao houver split)
     n_probe = n_validation + n_test
 
     discarded_probe_compat = len(discarded_test)
@@ -193,11 +273,13 @@ def run_experiment(
         "validation_evaluated": len(validation_records),
         "test_samples": n_test,
         "probe_evaluated": len(test_records),
-        "discarded_no_face": len(discarded_gallery) + len(discarded_test) + len(discarded_validation),
+        "discarded_no_face": len(discarded_gallery) + len(discarded_test) + len(discarded_validation) + len(discarded_train),
         "discarded_gallery": len(discarded_gallery),
         "discarded_probe": discarded_probe_compat,
         "discarded_validation": len(discarded_validation),
         "discarded_test": len(discarded_test),
+        "discarded_train": len(discarded_train),
+        "n_train": n_train,
         **{key: value for key, value in metrics.to_dict().items() if key in ("tp", "fp", "tn", "fn")},
     }
     validation_counts = {
@@ -205,17 +287,25 @@ def run_experiment(
         "validation_evaluated": len(validation_records),
         "discarded_validation": len(discarded_validation),
     }
+    opt_info_payload = optimization_info
+    if hasattr(optimization_info, "to_dict"):
+        try:
+            opt_info_payload = optimization_info.to_dict()
+        except Exception:
+            opt_info_payload = optimization_info
     run_dir = evaluator.save(
         metrics,
         name=name,
         output_dir=output_dir,
         config=config_info,
         counts=counts,
-        validation_metrics=validation_metrics,
-        validation_counts=validation_counts if has_validation else None,
+        validation_metrics=None,
+        validation_counts=None,
+        threshold_used=threshold_used,
+        optimization_info=opt_info_payload,
     )
 
-    all_discarded = discarded_gallery + discarded_validation + discarded_test
+    all_discarded = discarded_gallery + discarded_validation + discarded_test + discarded_train
     for path in all_discarded:
         print(f"[pipeline] descartada (sem face): {path}")
 
@@ -226,9 +316,13 @@ def run_experiment(
         n_probe=n_probe,
         discarded_gallery=len(discarded_gallery),
         discarded_probe=discarded_probe_compat,
-        validation_metrics=validation_metrics,
+        validation_metrics=None,
         n_validation=n_validation,
         n_test=n_test,
         discarded_validation=len(discarded_validation),
         discarded_test=len(discarded_test),
+        n_train=n_train,
+        discarded_train=len(discarded_train),
+        threshold_used=threshold_used,
+        optimization_info=optimization_info,
     )

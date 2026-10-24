@@ -20,3 +20,12 @@ class Model(ABC):
     def output_dim(self) -> int | None:
         """Dimensao do embedding, quando fixa (informativo)."""
         return None
+
+    def fine_tune(self, train_samples, *, detector, preprocessor, crop_padding, epochs=5, lr=1e-4) -> None:
+        """Fine-tuning (default no-op para modelos nao ajustaveis)."""
+        return None
+
+    @property
+    def is_fine_tunable(self) -> bool:
+        """Indica se o modelo suporta fine-tuning."""
+        return False

@@ -1,0 +1,1 @@
+"""Experimento ADR 003/007 — Deteccao YuNet + Reconhecimento ResNet50 Fine-Tuned (LFW)."""

@@ -52,7 +52,7 @@ python main.py metrics
 python main.py help
 
 # Consulta informações sobre utilização do comando run
-python main.py run help
+python main.py run --help
 ```
 
 ### Parâmetros

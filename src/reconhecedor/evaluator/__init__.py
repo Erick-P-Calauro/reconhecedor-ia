@@ -2,5 +2,6 @@
 
 from .evaluator import Evaluator
 from .metrics import Metrics, compute_metrics
+from .threshold_optimizer import ThresholdOptimizer, ThresholdOptimizationResult
 
-__all__ = ["Evaluator", "Metrics", "compute_metrics"]
+__all__ = ["Evaluator", "Metrics", "compute_metrics", "ThresholdOptimizer", "ThresholdOptimizationResult"]

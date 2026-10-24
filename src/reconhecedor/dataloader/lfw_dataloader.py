@@ -248,6 +248,60 @@ def _split_probe_samples(probe_samples, *, validation_ratio: float, test_ratio: 
     return validation, test
 
 
+def _split_probe_samples_finetune(
+    probe_samples,
+    *,
+    train_ratio: float,
+    validation_ratio: float,
+    test_ratio: float,
+):
+    """Divide amostras de probe em treino/validacao/teste por identidade."""
+    by_label: dict[str, list] = {}
+    for sample in probe_samples:
+        by_label.setdefault(sample.label, []).append(sample)
+
+    train_ids: set[int] = set()
+    val_ids: set[int] = set()
+    test_ids: set[int] = set()
+
+    for label, group in by_label.items():
+        ordered = sorted(group, key=lambda s: str(s.path))
+        n = len(ordered)
+        n_train = int(round(n * train_ratio))
+        n_val = int(round(n * validation_ratio))
+        if n_train + n_val > n:
+            n_val = max(0, n - n_train)
+        n_test = n - n_train - n_val
+        if n >= 3:
+            if n_train < 1:
+                n_train = 1
+            if n_val < 1:
+                n_val = 1
+            if n_test < 1:
+                n_test = 1
+            # reajusta soma
+            while n_train + n_val + n_test > n:
+                if n_train > 1:
+                    n_train -= 1
+                elif n_val > 1:
+                    n_val -= 1
+                else:
+                    n_test -= 1
+            while n_train + n_val + n_test < n:
+                n_train += 1
+        for sample in ordered[:n_train]:
+            train_ids.add(id(sample))
+        for sample in ordered[n_train : n_train + n_val]:
+            val_ids.add(id(sample))
+        for sample in ordered[n_train + n_val :]:
+            test_ids.add(id(sample))
+
+    train = [s for s in probe_samples if id(s) in train_ids]
+    validation = [s for s in probe_samples if id(s) in val_ids]
+    test = [s for s in probe_samples if id(s) in test_ids]
+    return train, validation, test
+
+
 # Aliases para compatibilidade com possiveis nomes de testes.
 split_probe_samples = _split_probe_samples
 split_probe = _split_probe_samples
@@ -296,12 +350,57 @@ def build_lfw_splits(
     )
 
 
+def build_lfw_splits_finetune(
+    root=None,
+    *,
+    sample_size,
+    n_classes,
+    min_photos_per_class,
+    train_ratio,
+    validation_ratio,
+    test_ratio,
+    rematerialize=False,
+    force=False,
+    **kwargs: Any,
+) -> tuple[_ListDataloader, _ListDataloader, _ListDataloader, _ListDataloader]:
+    """Factory que retorna (gallery_loader, train_loader, validation_loader, test_loader)."""
+    common = dict(kwargs)
+    common.update(
+        {
+            "min_faces_per_person": int(min_photos_per_class),
+            "n_identities": int(n_classes),
+            "max_per_identity": int(sample_size),
+            "rematerialize": bool(rematerialize),
+            "force": bool(force),
+        }
+    )
+    gallery_loader_raw, probe_loader_raw = build_lfw_loaders(root, **common)
+    gallery_samples = gallery_loader_raw.load()
+    probe_samples = probe_loader_raw.load()
+
+    train_samples, validation_samples, test_samples = _split_probe_samples_finetune(
+        probe_samples,
+        train_ratio=float(train_ratio),
+        validation_ratio=float(validation_ratio),
+        test_ratio=float(test_ratio),
+    )
+
+    return (
+        _ListDataloader(gallery_samples),
+        _ListDataloader(train_samples),
+        _ListDataloader(validation_samples),
+        _ListDataloader(test_samples),
+    )
+
+
 __all__ = [
     "LFWDataloader",
     "build_lfw_loaders",
     "build_lfw_splits",
+    "build_lfw_splits_finetune",
     "_ListDataloader",
     "_split_probe_samples",
+    "_split_probe_samples_finetune",
     "split_probe_samples",
     "split_probe",
     "split_lfw_probe",

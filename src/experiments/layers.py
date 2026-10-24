@@ -16,7 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from experiments.config import ExperimentConfig, load_config
-from reconhecedor.dataloader import build_lfw_loaders, build_lfw_splits, lfw_dataset
+from reconhecedor.dataloader import build_lfw_loaders, build_lfw_splits, build_lfw_splits_finetune, lfw_dataset
 from reconhecedor.evaluator import Evaluator
 from reconhecedor.face_detector import FaceNetDetector, YuNetFaceDetector
 from reconhecedor.face_recognition import FaceRecognition
@@ -41,7 +41,7 @@ def build_detector(name: str, *, detector_model_path: str | Path | None = None):
     raise ValueError(f"face_detection_model desconhecido: {name!r} (use 'yunet' ou 'facenet')")
 
 
-def build_recognition(name: str, *, image_size: int):
+def build_recognition(name: str, *, image_size: int, epochs=None, lr=None, fine_tune_epochs=None, learning_rate=None):
     """Instancia (Model, PreProcessor) casados pelo nome do modelo de reconhecimento."""
     if name == "resnet50":
         model = ResNet50Model()
@@ -70,17 +70,31 @@ def build_layers(
     model, preprocessor = build_recognition(
         config.face_recognition_model, image_size=int(params["image_size"])
     )
-    gallery_loader, validation_loader, test_loader = build_lfw_splits(
-        config.dataset,
-        sample_size=config.sample_size,
-        n_classes=config.n_classes,
-        min_photos_per_class=config.min_photos_per_class,
-        validation_ratio=config.validation_ratio,
-        test_ratio=config.test_ratio,
-        rematerialize=rematerialize,
-    )
+    if getattr(config, "train_ratio", None) is not None:
+        gallery_loader, train_loader, validation_loader, test_loader = build_lfw_splits_finetune(
+            config.dataset,
+            sample_size=config.sample_size,
+            n_classes=config.n_classes,
+            min_photos_per_class=config.min_photos_per_class,
+            train_ratio=config.train_ratio,
+            validation_ratio=config.validation_ratio,
+            test_ratio=config.test_ratio,
+            rematerialize=rematerialize,
+        )
+    else:
+        gallery_loader, validation_loader, test_loader = build_lfw_splits(
+            config.dataset,
+            sample_size=config.sample_size,
+            n_classes=config.n_classes,
+            min_photos_per_class=config.min_photos_per_class,
+            validation_ratio=config.validation_ratio,
+            test_ratio=config.test_ratio,
+            rematerialize=rematerialize,
+        )
+        train_loader = None
     return {
         "gallery_loader": gallery_loader,
+        "train_loader": train_loader,
         "validation_loader": validation_loader,
         "test_loader": test_loader,
         "detector": detector,
@@ -106,6 +120,9 @@ def run(
     min_photos_per_class: int | None = None,
     validation_ratio: float | None = None,
     test_ratio: float | None = None,
+    train_ratio: float | None = None,
+    fine_tune_epochs: int | None = None,
+    learning_rate: float | None = None,
 ) -> ExperimentResult:
     """Executa um experimento ponta a ponta a partir do seu ``config.json``.
 
@@ -131,6 +148,8 @@ def run(
         config.validation_ratio = validation_ratio
     if test_ratio is not None:
         config.test_ratio = test_ratio
+    if train_ratio is not None:
+        config.train_ratio = train_ratio
 
     # O dataset LFW e materializado sob demanda.
     lfw_dataset.ensure_dataset(
@@ -140,6 +159,11 @@ def run(
         n_identities=config.n_classes,
         min_faces_per_person=config.min_photos_per_class,
     )
+
+    if fine_tune_epochs is None:
+        fine_tune_epochs = int(config.parameters.get("fine_tune_epochs", 5))
+    if learning_rate is None:
+        learning_rate = float(config.parameters.get("learning_rate", 1e-4))
 
     layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=rematerialize)
     return run_experiment(
@@ -153,5 +177,8 @@ def run(
         min_photos_per_class=config.min_photos_per_class,
         validation_ratio=config.validation_ratio,
         test_ratio=config.test_ratio,
+        train_ratio=config.train_ratio,
+        fine_tune_epochs=fine_tune_epochs,
+        learning_rate=learning_rate,
         **layers,
     )

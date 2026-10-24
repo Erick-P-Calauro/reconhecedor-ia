@@ -35,6 +35,9 @@ def run(
     min_photos_per_class=None,
     validation_ratio=None,
     test_ratio=None,
+    train_ratio=None,
+    fine_tune_epochs=None,
+    learning_rate=None,
 ) -> ExperimentResult:
     """Executa o experimento ponta a ponta, gravando em ``config.results_dir``."""
     return layers.run(
@@ -51,4 +54,7 @@ def run(
         min_photos_per_class=min_photos_per_class,
         validation_ratio=validation_ratio,
         test_ratio=test_ratio,
+        train_ratio=train_ratio,
+        fine_tune_epochs=fine_tune_epochs,
+        learning_rate=learning_rate,
     )

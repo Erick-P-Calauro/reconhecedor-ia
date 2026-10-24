@@ -104,6 +104,9 @@ def cmd_run(args: argparse.Namespace) -> int:
             "min_photos_per_class": args.min_photos_per_class,
             "validation_ratio": args.validation_ratio,
             "test_ratio": args.test_ratio,
+            "train_ratio": args.train_ratio,
+            "fine_tune_epochs": args.fine_tune_epochs,
+            "learning_rate": args.learning_rate,
         }.items()
         if value is not None
     }
@@ -115,8 +118,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     print()
     print(f"Experimento '{config.name}' concluido")
     print(f"  config: {module.CONFIG_PATH}")
-    print(f"  galeria: {result.n_gallery} imagens | validacao: {result.n_validation} imagens | teste: {result.n_test} imagens")
-    print(f"  descartadas sem face: {result.discarded_gallery + result.discarded_validation + result.discarded_test}")
+    print(f"  galeria: {result.n_gallery} imagens | teste: {result.n_test} imagens")
+    if getattr(result, "n_train", 0):
+        print(f"  treino: {result.n_train} imagens")
+    print(f"  descartadas sem face: {result.discarded_gallery + result.discarded_validation + result.discarded_test + getattr(result, 'discarded_train', 0)}")
     print(
         "  teste: acuracia={accuracy:.4f} precisao={precision:.4f} recall={recall:.4f} "
         "FAR={far:.4f} FRR={frr:.4f}".format(
@@ -127,18 +132,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             frr=metrics.frr,
         )
     )
-    if result.validation_metrics is not None:
-        vm = result.validation_metrics
-        print(
-            "  validacao: acuracia={accuracy:.4f} precisao={precision:.4f} recall={recall:.4f} "
-            "FAR={far:.4f} FRR={frr:.4f}".format(
-                accuracy=vm.accuracy,
-                precision=vm.precision,
-                recall=vm.recall,
-                far=vm.far,
-                frr=vm.frr,
-            )
-        )
+    if getattr(result, "optimization_info", None) is not None and getattr(result, "threshold_used", None) is not None:
+        print(f"  threshold otimizado: {result.threshold_used}")
     print(f"  metricas salvas em: {result.run_dir}")
     return 0
 
@@ -254,6 +249,9 @@ def build_parser() -> FriendlyArgumentParser:
     run.add_argument("--min-photos-per-class", type=int, default=None, help="fotos minimas por classe")
     run.add_argument("--validation-ratio", type=float, default=None, help="proporcao de validacao")
     run.add_argument("--test-ratio", type=float, default=None, help="proporcao de teste")
+    run.add_argument("--train-ratio", type=float, default=None, help="proporcao de treino (fine-tuning)")
+    run.add_argument("--fine-tune-epochs", type=int, default=None, help="epocas de fine-tuning")
+    run.add_argument("--learning-rate", type=float, default=None, help="taxa de aprendizado do fine-tuning")
     run.set_defaults(func=cmd_run)
 
     metrics = subparsers.add_parser(

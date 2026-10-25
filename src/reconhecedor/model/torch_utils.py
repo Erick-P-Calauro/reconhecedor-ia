@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from ..seed import set_seed, DEFAULT_SEED, fix_seed, seed_everything
+
 
 def to_batch(image: np.ndarray, device: "torch.device") -> "torch.Tensor":
     """Converte a saida do PreProcessor em um batch NCHW pronto para a rede.
@@ -23,4 +25,4 @@ def to_batch(image: np.ndarray, device: "torch.device") -> "torch.Tensor":
     return torch.from_numpy(np.ascontiguousarray(array)).unsqueeze(0).to(device)
 
 
-__all__ = ["to_batch"]
+__all__ = ["to_batch", "set_seed", "DEFAULT_SEED", "fix_seed", "seed_everything"]

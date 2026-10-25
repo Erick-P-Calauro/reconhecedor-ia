@@ -15,7 +15,7 @@ from torch import nn
 from torchvision.models import ResNet50_Weights, resnet50
 
 from .base import Model
-from .torch_utils import to_batch
+from .torch_utils import to_batch, set_seed
 
 #: Pesos ImageNet usados por padrao.
 DEFAULT_WEIGHTS = ResNet50_Weights.IMAGENET1K_V2
@@ -51,7 +51,8 @@ class ResNet50Model(Model):
             features = self._network(batch)
         return features.reshape(-1).cpu().numpy().astype(np.float32)
 
-    def fine_tune(self, train_samples, *, detector, preprocessor, crop_padding, epochs=5, lr=1e-4) -> None:
+    def fine_tune(self, train_samples, *, detector, preprocessor, crop_padding, epochs=5, lr=1e-4, seed=42) -> None:
+        set_seed(seed)
         print("[Model] fine-tuning iniciado")
         images: list[np.ndarray] = []
         labels: list[int] = []

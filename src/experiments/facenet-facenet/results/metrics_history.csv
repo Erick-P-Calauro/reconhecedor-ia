@@ -11,3 +11,4 @@ timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn
 2026-10-23T16:42:49,facenet-facenet,data/lfw,facenet,0.963211,0.855615,0.963855,0.036936,0.036145,160,27,704,6,0
 2026-10-24T17:02:10,facenet-facenet,data/lfw,facenet,0.992,1.0,0.952381,0.0,0.047619,20,0,104,1,0
 2026-10-24T17:12:05,facenet-facenet,data/lfw,facenet,0.996981,0.993464,0.980645,0.000855,0.019355,152,1,1169,3,0
+2026-10-25T10:47:35,facenet-facenet,data/lfw,facenet,0.996377,0.989583,0.979381,0.001368,0.020619,95,1,730,2,0

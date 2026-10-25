@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from ..types import PredictionRecord
 from .metrics import Metrics, compute_metrics
+from .plots import generate_plots
 
 HISTORY_FILENAME = "metrics_history.csv"
 HISTORY_FIELDS = [
@@ -34,6 +35,9 @@ class Evaluator:
         print("[Evaluator] inicializando")
         print("[Evaluator] inicializado")
 
+    def generate_plots(self, records, enrolled_labels=None, output_dir=".", threshold_used=None):
+        return generate_plots(records, enrolled_labels, output_dir, threshold_used=threshold_used)
+
     def evaluate(
         self,
         records: list[PredictionRecord],
@@ -57,6 +61,9 @@ class Evaluator:
         validation_counts: dict | None = None,
         threshold_used=None,
         optimization_info=None,
+        records=None,
+        enrolled_labels=None,
+        seed=None,
     ) -> Path:
         """Grava as metricas em arquivo para consulta posterior."""
         print("[Evaluator] salvando resultados")
@@ -83,7 +90,15 @@ class Evaluator:
             json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
+        if seed is not None:
+            payload.setdefault("seed", seed)
         self._append_history(output_dir / HISTORY_FILENAME, payload)
+        # Gera graficos de avaliacao (best-effort).
+        try:
+            if records is not None:
+                generate_plots(records, enrolled_labels, run_dir, threshold_used=threshold_used)
+        except Exception:
+            pass
         print(f"[Evaluator] resultados salvos em {run_dir}")
         return run_dir
 

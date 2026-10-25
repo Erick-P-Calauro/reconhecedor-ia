@@ -38,6 +38,7 @@ def run(
     train_ratio=None,
     fine_tune_epochs=None,
     learning_rate=None,
+    seed=None,
 ) -> ExperimentResult:
     """Executa o experimento ponta a ponta, gravando em ``config.results_dir``."""
     return layers.run(
@@ -57,4 +58,5 @@ def run(
         train_ratio=train_ratio,
         fine_tune_epochs=fine_tune_epochs,
         learning_rate=learning_rate,
+        seed=seed,
     )

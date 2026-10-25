@@ -14,6 +14,7 @@ from .preprocessor.base import PreProcessor
 from .types import PredictionRecord, Sample
 from dataclasses import dataclass
 from pathlib import Path
+from .seed import set_seed
 
 @dataclass
 class ExperimentResult:
@@ -32,6 +33,7 @@ class ExperimentResult:
     discarded_train: int = 0
     threshold_used: float | None = None
     optimization_info: object = None
+    seed: int | None = None
 
 
 # Detecta a face, recorta, pré-processa e gera embedding
@@ -105,10 +107,13 @@ def run_experiment(
     train_loader: Dataloader | None = None,
     fine_tune_epochs: int = 5,
     learning_rate: float = 1e-4,
+    seed: int = 42,
 ) -> ExperimentResult:
     
     recognition = recognition if recognition is not None else FaceRecognition(threshold=threshold)
     evaluator = evaluator if evaluator is not None else Evaluator()
+
+    set_seed(seed)
 
     if test_loader is None:
         test_loader = probe_loader
@@ -139,6 +144,7 @@ def run_experiment(
                 crop_padding=crop_padding,
                 epochs=fine_tune_epochs,
                 lr=learning_rate,
+                seed=seed,
             )
         else:
             print("[pipeline] modelo nao permite fine-tuning; treino ignorado")
@@ -251,6 +257,18 @@ def run_experiment(
         "validation_ratio": validation_ratio,
         "test_ratio": test_ratio,
         "train_ratio": train_ratio,
+        "fine_tune_epochs": fine_tune_epochs,
+        "learning_rate": learning_rate,
+        "epochs": fine_tune_epochs,
+        "lr": learning_rate,
+        "seed": seed,
+        "training_parameters": {
+            "fine_tune_epochs": fine_tune_epochs,
+            "learning_rate": learning_rate,
+            "epochs": fine_tune_epochs,
+            "lr": learning_rate,
+            "seed": seed,
+        },
         "dataset_parameters": {
             "sample_size": sample_size,
             "n_classes": n_classes,
@@ -303,6 +321,9 @@ def run_experiment(
         validation_counts=None,
         threshold_used=threshold_used,
         optimization_info=opt_info_payload,
+        records=test_records,
+        enrolled_labels=enrolled_ids,
+        seed=seed,
     )
 
     all_discarded = discarded_gallery + discarded_validation + discarded_test + discarded_train
@@ -325,4 +346,5 @@ def run_experiment(
         discarded_train=len(discarded_train),
         threshold_used=threshold_used,
         optimization_info=optimization_info,
+        seed=seed,
     )

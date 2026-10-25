@@ -136,6 +136,7 @@ def run(
     train_ratio: float | None = None,
     fine_tune_epochs: int | None = None,
     learning_rate: float | None = None,
+    seed: int | None = None,
 ) -> ExperimentResult:
     """Executa um experimento ponta a ponta a partir do seu ``config.json``.
 
@@ -186,6 +187,8 @@ def run(
         fine_tune_epochs = int(config.parameters.get("fine_tune_epochs", 5))
     if learning_rate is None:
         learning_rate = float(config.parameters.get("learning_rate", 1e-4))
+    if seed is None:
+        seed = int(config.parameters.get("seed", 42))
 
     layers = build_layers(config, detector_model_path=detector_model_path, rematerialize=rematerialize)
     return run_experiment(
@@ -202,5 +205,6 @@ def run(
         train_ratio=config.train_ratio,
         fine_tune_epochs=fine_tune_epochs,
         learning_rate=learning_rate,
+        seed=seed,
         **layers,
     )

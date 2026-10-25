@@ -107,6 +107,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             "train_ratio": args.train_ratio,
             "fine_tune_epochs": args.fine_tune_epochs,
             "learning_rate": args.learning_rate,
+            "seed": args.seed,
         }.items()
         if value is not None
     }
@@ -252,6 +253,7 @@ def build_parser() -> FriendlyArgumentParser:
     run.add_argument("--train-ratio", type=float, default=None, help="proporcao de treino (fine-tuning)")
     run.add_argument("--fine-tune-epochs", type=int, default=None, help="epocas de fine-tuning")
     run.add_argument("--learning-rate", type=float, default=None, help="taxa de aprendizado do fine-tuning")
+    run.add_argument("--seed", type=int, default=None, help="seed para reproducibilidade")
     run.set_defaults(func=cmd_run)
 
     metrics = subparsers.add_parser(

@@ -10,6 +10,8 @@ Você pode consultar a pasta docs para entender quais funcionalidades o sistema 
  - [Arquitetura do sistema](#requisites)
  - [Como instalar as dependências](#instalacao)
  - [Como utilizar o sistema](#utilizacao)
+ - [Reprodução dos resultados](#commands)
+ - [Referências](#references)
 
 <h2 id="hypothesis">Hipóteses dos experimentos de reconhecimento facial</h2>
 
@@ -153,3 +155,29 @@ python main.py run --experiment baseline --dataset data/meu-dataset `
 
 # Consulta o histórico de métricas do experimento baseline
 python main.py metrics --experiment baseline
+```
+
+<h2 id="commands">Reprodução dos Resultados</h2>
+
+Para reproduzir os resultados dos experimentos públicos exibidos na tabela de resultados é possível executar os seguintes comandos : 
+
+```powershell
+# Experimento 01
+python main.py run --experiment yunet-resnet50 –rematerialize --sample-size 100 --min-photos-per-class 3 --n-classes 50 --validation-ratio 0.4 --test-ratio 0.6.
+
+# Experimento 02
+python main.py run --experiment yunet-resnet50-finetuned --seed 42 --learning-rate 0.0001 --fine-tune-epochs 5 --rematerialize --sample-size 100 --min-photos-per-class 3 --n-classes 50 --train-ratio 0.3 --validation-ratio 0.3 --test-ratio 0.4 
+
+# Experimento 03
+python main.py run --experiment facenet-facenet --rematerialize --sample-size 100 --min-photos-per-class 3 --n-classes 50 --validation-ratio 0.4 --test-ratio 0.6  
+
+# Experimento 04
+python main.py run --experiment yunet-facenet --rematerialize --sample-size 100 --min-photos-per-class 3 --n-classes 50 --validation-ratio 0.4 --test-ratio 0.6          
+```
+
+<h2 id="references"> Referências </h2>
+
+Este repositório utilizou os seguintes artefatos :  
+ - Modelos FaceNet e ResNet50 disponibilizados pela biblioteca torchvision
+ - Modelo YuNet disponível em : https://github.com/opencv/opencv_zoo/blob/main/models/face_detection_yunet/README.md
+ - Dataset Labeled Faces In the Wild via biblioteca Scikit-Learn e disponível em : https://scikit-learn.org/0.16/datasets/labeled_faces.html.

@@ -1,0 +1,2 @@
+timestamp,experiment,dataset,model,accuracy,precision,recall,far,frr,tp,fp,tn,fn,discarded_no_face
+2026-10-25T15:17:08,yunet-resnet50,data/lfw,resnet50,0.821752,0.25,0.25641,0.10274,0.74359,30,90,786,87,0

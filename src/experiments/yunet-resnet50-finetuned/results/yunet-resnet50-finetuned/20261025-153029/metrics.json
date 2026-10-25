@@ -1,0 +1,85 @@
+{
+  "experiment": {
+    "name": "yunet-resnet50-finetuned",
+    "timestamp": "2026-10-25T15:30:29"
+  },
+  "config": {
+    "dataset": "data/lfw",
+    "model": "resnet50",
+    "face_detector": "yunet",
+    "preprocessor": "imagenet-224x224",
+    "recognition": "cosine-threshold-0.73",
+    "threshold": 0.6,
+    "threshold_used": 0.7337016463279724,
+    "crop_padding": 0.25,
+    "sample_size": 100,
+    "n_classes": 50,
+    "min_photos_per_class": 3,
+    "validation_ratio": 0.3,
+    "test_ratio": 0.4,
+    "train_ratio": 0.3,
+    "fine_tune_epochs": 5,
+    "learning_rate": 0.0001,
+    "epochs": 5,
+    "lr": 0.0001,
+    "seed": 42,
+    "training_parameters": {
+      "fine_tune_epochs": 5,
+      "learning_rate": 0.0001,
+      "epochs": 5,
+      "lr": 0.0001,
+      "seed": 42
+    },
+    "dataset_parameters": {
+      "sample_size": 100,
+      "n_classes": 50,
+      "min_photos_per_class": 3,
+      "validation_ratio": 0.3,
+      "test_ratio": 0.4,
+      "train_ratio": 0.3
+    }
+  },
+  "counts": {
+    "gallery_samples": 454,
+    "gallery_enrolled": 7,
+    "probe_samples": 1156,
+    "validation_samples": 500,
+    "validation_evaluated": 500,
+    "test_samples": 656,
+    "probe_evaluated": 656,
+    "discarded_no_face": 0,
+    "discarded_gallery": 0,
+    "discarded_probe": 0,
+    "discarded_validation": 0,
+    "discarded_test": 0,
+    "discarded_train": 0,
+    "n_train": 500,
+    "tp": 33,
+    "fp": 48,
+    "tn": 530,
+    "fn": 45
+  },
+  "metrics": {
+    "accuracy": 0.858232,
+    "precision": 0.407407,
+    "recall": 0.423077,
+    "far": 0.083045,
+    "frr": 0.576923,
+    "tp": 33,
+    "fp": 48,
+    "tn": 530,
+    "fn": 45,
+    "total": 656
+  },
+  "threshold_used": 0.7337016463279724,
+  "optimization_info": {
+    "threshold": 0.7337016463279724,
+    "f1": 0.4285714285714286,
+    "precision": 0.4444444444444444,
+    "recall": 0.41379310344827586,
+    "tp": 24,
+    "fp": 30,
+    "tn": 412,
+    "fn": 34
+  }
+}

@@ -41,7 +41,7 @@ A seguir estão dispostas as hipóteses sobre desempenho dos experimentos.
 |E02|YuNet|ResNet50 (Fine Tuned)|LFW| 0.8528|0.4074|0.4230|0.0830|0.5769|
 |E03|FaceNet| FaceNet| LFW| 0.9939|0.9915|0.9572|0.0011|0.0427|
 |E04|YuNet|FaceNet| LFW |0.9949|0.9912|0.9658|0.0011|0.0341|
-|E05|YuNet|FaceNet| Private | 0.9990|1.0000|0.9166|0.0000|0.0833|
+|E05|YuNet|FaceNet| LFW+Private | 0.9990|1.0000|0.9166|0.0000|0.0833|
 
 Observação :  Os resultados dos experimentos são detalhados nos arquivos metrics.json de cada experimento contido no repositório.
 
@@ -78,13 +78,23 @@ A seguir são dispostos os gráficos de Curva ROC e Curva FAR-FRR de cada experi
 
 #### H1 - Efeitos do Fine-Tuning no desempenho (E01xE02)
 
+Os dados corroboram com a hipótese, tendo em vista que acurácia, precisão e recall aumentaram e as métricas de FAR e FRR diminuíram.
+
 #### H2 - Efeitos do fine-tuning da distribuição de falsos positivos e falsos negativos (E01xE02)
+
+Os dados são inconclusivos, contudo é possível observar que o limiar de desconhecimento do E02, que contém fine tuning, é consideravelmente menor. 
 
 #### H3 - Comparação entre Fine Tuning e Treinamento Especializado (E02xE04)
 
+Os dados corroboram com a hipótese, tendo em vista o aumento significativo nas métricas de acurácia, precisão e recall.
+
 #### H4 - Efeitos do detector facial no desempenho (E03xE04)
 
+Os dados não corroboram com a hipótese pois a variação nas métricas foi pouco significante. Mesmo nesse caso o E03 teve uma menor acurácia.
+
 #### H5 - Diferenças de dataset (E04xE05)
+
+Os dados corroboram com a hipótese, contudo as métricas de recall, far e frr apresentaram variação significativa, podendo indicar que a inclusão de dados privados alterou o perfil de reconhecimento dos modelos. Em contrapartida, o tamanho da amostra enfraquece a análise e evidencia a necessidade de testes com bases de dados maiores.
 
 <h2 id="arquitetura">Arquitetura do Sistema</h2>
 

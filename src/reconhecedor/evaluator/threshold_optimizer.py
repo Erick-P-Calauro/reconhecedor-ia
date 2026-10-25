@@ -1,4 +1,4 @@
-"""Otimizacao de threshold por F1 (Spec 005 / RF-05).
+"""Otimizacao de threshold por F1 (Spec 005).
 
 Busca o threshold de similaridade que maximiza o F1 sobre um conjunto de
 validacao, usando ``best_label`` + ``similarity`` de cada ``PredictionRecord``.

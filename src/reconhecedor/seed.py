@@ -8,7 +8,6 @@ que experimentos sejam replicaveis entre execucoes.
 from __future__ import annotations
 
 import random
-from typing import Any
 
 DEFAULT_SEED = 42
 

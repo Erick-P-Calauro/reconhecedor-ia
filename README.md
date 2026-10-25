@@ -6,6 +6,7 @@ Você pode consultar a pasta docs para entender quais funcionalidades o sistema 
 
 ## Sumário 
  - [Hipóteses dos experimentos do sistema](#hypothesis)
+ - [Resultados e Discussão](#resultados)
  - [Arquitetura do sistema](#requisites)
  - [Como instalar as dependências](#instalacao)
  - [Como utilizar o sistema](#utilizacao)
@@ -30,6 +31,60 @@ A seguir estão dispostas as hipóteses sobre desempenho dos experimentos.
  - **H3 - Comparação entre Fine Tuning e Treinamento Especializado (E02xE04)** : O experimento E04 apresentará maior acurácia e maior recall em relação ao E02, mantendo ou melhorando a métrica de precisão. A justificativa é de que o modelo de reconhecimento do E04 foi treinado de forma especializada para o problema de reconhecimento facial.
  - **H4 - Efeitos do detector facial no desempenho (E03xE04)** : O experimento E03 apresentará resultados significativamente diferentes em relação ao E04, aumentando o nível de acurácia. A justificativa proposta é a diferença do objetivo de treinamento de cada modelo (Detecção x Reconhecimento).
  - **H5 - Diferenças de dataset (E04xE05)** : O experimento E05 não apresentará diferenças significativas em relação ao E04 no que concerne acurácia e precisão. A justificativa proposta é que a inserção da face do autor não terá efeito significativo no experimento. Este experimento apresenta ameaça a sua validade por conta do tamanho da amostra.
+
+<h2 id="resultados"> Resultados dos experimentos </h2>
+
+### Tabela de Resultados
+| Experimento | Detector | Reconhecedor | Dataset | Acurácia | Precisão | Recall | FAR | FRR |
+|-------------|----------|--------------|---------|----------|----------|--------|-----|-----|
+|E01|YuNet|ResNet50 (Baseline)|LFW|0.8217|0.2500|0.2564|0.1027|0.7435|
+|E02|YuNet|ResNet50 (Fine Tuned)|LFW| 0.8528|0.4074|0.4230|0.0830|0.5769|
+|E03|FaceNet| FaceNet| LFW| 0.9939|0.9915|0.9572|0.0011|0.0427|
+|E04|YuNet|FaceNet| LFW |0.9949|0.9912|0.9658|0.0011|0.0341|
+|E05|YuNet|FaceNet| Private | 0.9990|1.0000|0.9166|0.0000|0.0833|
+
+Observação :  Os resultados dos experimentos são detalhados nos arquivos metrics.json de cada experimento contido no repositório.
+
+### Gráficos
+
+A seguir são dispostos os gráficos de Curva ROC e Curva FAR-FRR de cada experimento realizado.
+
+#### Experimento 01
+
+<img src="./src/experiments/yunet-resnet50/results/yunet-resnet50/20261025-151708/curva_roc.png" />
+<img src="./src/experiments/yunet-resnet50/results/yunet-resnet50/20261025-151708/far_frr.png" />
+
+#### Experimento 02
+
+<img src="./src/experiments/yunet-resnet50-finetuned/results/yunet-resnet50-finetuned/20261025-153029/curva_roc.png" />
+<img src="./src/experiments/yunet-resnet50-finetuned/results/yunet-resnet50-finetuned/20261025-153029/far_frr.png" />
+
+#### Experimento 03
+
+<img src="./src/experiments/facenet-facenet/results/facenet-facenet/20261025-154737/curva_roc.png" />
+<img src="./src/experiments/facenet-facenet/results/facenet-facenet/20261025-154737/far_frr.png" />
+
+#### Experimento 04
+
+<img src="./src/experiments/yunet-facenet/results/yunet-facenet/20261025-155758/curva_roc.png" />
+<img src="./src/experiments/yunet-facenet/results/yunet-facenet/20261025-155758/far_frr.png" />
+
+#### Experimento 05
+
+<img src="./src/experiments/private-yunet-facenet/results/private-yunet-facenet/20261025-160900/curva_roc.png" />
+<img src="./src/experiments/private-yunet-facenet/results/private-yunet-facenet/20261025-160900/far_frr.png" />
+
+### Discussão
+
+#### H1 - Efeitos do Fine-Tuning no desempenho (E01xE02)
+
+#### H2 - Efeitos do fine-tuning da distribuição de falsos positivos e falsos negativos (E01xE02)
+
+#### H3 - Comparação entre Fine Tuning e Treinamento Especializado (E02xE04)
+
+#### H4 - Efeitos do detector facial no desempenho (E03xE04)
+
+#### H5 - Diferenças de dataset (E04xE05)
 
 <h2 id="arquitetura">Arquitetura do Sistema</h2>
 

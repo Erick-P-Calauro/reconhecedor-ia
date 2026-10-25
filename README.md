@@ -7,7 +7,7 @@ Você pode consultar a pasta docs para entender quais funcionalidades o sistema 
 ## Sumário 
  - [Hipóteses dos experimentos do sistema](#hypothesis)
  - [Resultados e Discussão](#resultados)
- - [Arquitetura do sistema](#requisites)
+ - [Arquitetura do sistema](#arquitetura)
  - [Como instalar as dependências](#instalacao)
  - [Como utilizar o sistema](#utilizacao)
  - [Reprodução dos resultados](#commands)
